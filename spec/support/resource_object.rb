@@ -1,13 +1,22 @@
-Phone = Struct.new(:id, :manufacturer, :model, :number)
-Car = Struct.new(:id, :make, :model, :year, :color)
+Phone = Struct.new(:id, :manufacturer, :model, :number) do
+  def self.pluralize
+    'phones'
+  end
+end
+
+Car = Struct.new(:id, :make, :model, :year, :color)do
+  def self.pluralize
+    'cars'
+  end
+end
 
 Person = Struct.new(:name, :occupation, :address) do
-  def id
-    '91f37652-c015-4e04-ba55-815fb5407d12'
+  def self.pluralize
+    'people'
   end
 
-  def to_s
-    'people'
+  def id
+    '91f37652-c015-4e04-ba55-815fb5407d12'
   end
 
   def cars
