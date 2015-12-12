@@ -14,6 +14,14 @@ class PersonResource < JSONAPI::Resource
   end
 end
 
+class PhoneResource < JSONAPI::Resource
+  attribute :manufacturer
+  attribute :model
+  attribute :number
+
+  has_one :person
+end
+
 RSpec.describe JSONAPI::Resource do
   it 'should serialize specified attributes' do
     person = Person.new('bob', 'painter', 'heaven')
@@ -40,15 +48,46 @@ RSpec.describe JSONAPI::Resource do
     expect(serialized['attributes']['updated_at']).to be_present
   end
 
-  it 'serializes has_one relationship data' do
-    person = Person.new('bob', 'painter', 'heaven')
-    serialized = PersonResource.new(person).to_hash
-    expect(serialized['relationships']['phone']).to_not be_nil
-  end
+  describe 'relationships' do
+    context 'with a cardinality of one' do
+      let(:serialized_resource) do
+        person = Person.new('bob', 'painter', 'heaven')
+        PersonResource.new(person).to_hash
+      end
 
-  it 'serializes has_many relationship data' do
-    person = Person.new('bob', 'painter', 'heaven')
-    serialized = PersonResource.new(person).to_hash
-    expect(serialized['relationships']['cars']).to_not be_nil
+      it 'includes the relationship keys' do
+        expect(serialized_resource['relationships']['phone']).to_not be_nil
+      end
+
+      it 'includes the type for the relationship' do
+        expect(serialized_resource['relationships']['phone']['data']['type']).to eq('phone')
+      end
+
+      it 'includes the id for the relationship' do
+        expect(serialized_resource['relationships']['phone']['data']['id']).to eq '8ce1c5f8-4081-4de2-b126-5dbf31f8aa1e'
+      end
+    end
+
+    context 'with a cardinality of many' do
+      let(:serialized_resource) do
+        person = Person.new('bob', 'painter', 'heaven')
+        PersonResource.new(person).to_hash
+      end
+      it 'includes relationship data' do
+        expect(serialized_resource['relationships']['cars']).to_not be_nil
+      end
+
+      it 'includes the type for the relationship' do
+        serialized_resource['relationships']['cars']['data'].map do |car|
+          expect(car['type']).to eq 'cars'
+        end
+      end
+
+      it 'includes the id for the relationship' do
+        serialized_resource['relationships']['cars']['data'].map do |car|
+          expect(car['id']).to_not be_blank
+        end
+      end
+    end
   end
 end

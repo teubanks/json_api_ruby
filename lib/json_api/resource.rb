@@ -3,23 +3,29 @@ module JSONAPI
     attr_accessor :_model
     def initialize(model, options={})
       @_model = model
+      @is_relationship = options.fetch(:is_relationship, false)
     end
 
     def to_hash
       resource_hash = {
-        'id' =>  @_model.id,
-        'type' =>  @_model.class.to_s.underscore.pluralize,
-        'attributes' =>  attributes_hash
+        'id' =>  _model.id,
+        'type' =>  _model.class.to_s.underscore.pluralize
       }
+      resource_hash['attributes'] = attributes_hash unless is_relationship?
 
-      if self.class.relationships.present?
+      if self.class.relationships.present? && !is_relationship?
         resource_hash['relationships'] = relationships_hash
       end
+
       resource_hash
     end
 
+    def is_relationship?
+      @is_relationship == true
+    end
+
     def object
-      @_model
+      _model
     end
 
     def attributes_hash
@@ -33,10 +39,32 @@ module JSONAPI
     def relationships_hash
       hash = {}
       self.class.relationships.each do |rel|
-        hash[rel[:name].to_s] = {}
+        data = _model.send(rel[:name])
+        if data.kind_of?(Array)
+          data = data.map {|d| { 'id' => d.id, 'type' => rel[:name].to_s } }
+        else
+          data = { 'id' => data.id, 'type' => rel[:name].to_s }
+        end
+        hash[rel[:name].to_s] = {
+          'data' => data
+        }
       end
       hash
     end
+
+    # def get_relationship_data(rel)
+    #   resource_class = discover_resource(rel[:name], rel)
+    #   resource_class.new(
+    # end
+
+    # def discover_resource(resource_name, options={})
+    #   klass = options.fetch(:class_name, nil)
+    #   if klass
+    #     const_get(klass)
+    #   else
+    #     const_get("#{resource_name.classify}Resource")
+    #   end
+    # end
 
     class << self
       attr :fields
