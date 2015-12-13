@@ -4,6 +4,12 @@ module JSONAPI
     attr :fields
     attr :relationships
 
+    def attributes(*attrs)
+      attrs.each do |attr|
+        attribute(attr)
+      end
+    end
+
     def attribute(attr)
       @fields ||= []
       @fields << attr
@@ -18,6 +24,11 @@ module JSONAPI
       add_relationship(object, {cardinality: :many}.merge(options))
     end
 
+    def primary_key(key)
+      @_primary_key = key
+    end
+
+    private
     def add_relationship(object, options)
       @relationships ||= []
       @relationships << {
@@ -26,11 +37,6 @@ module JSONAPI
       create_accessor_methods(object)
     end
 
-    def primary_key(key)
-      @_primary_key = key
-    end
-
-    private
     def create_accessor_methods(attr)
       define_method(attr) do
         object.public_send(attr)

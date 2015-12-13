@@ -15,9 +15,7 @@ class PersonResource < JSONAPI::Resource
 end
 
 class PhoneResource < JSONAPI::Resource
-  attribute :manufacturer
-  attribute :model
-  attribute :number
+  attributes :manufacturer, :model, :number
 
   has_one :person
 end

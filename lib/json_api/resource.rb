@@ -11,6 +11,8 @@ module JSONAPI
     # class ObjectResource < JSONAPI::Resource
     #   primary_key :uuid
     # end
+    #
+    # defaults to :id
     def id
       object.public_send(self.class._primary_key)
     end
