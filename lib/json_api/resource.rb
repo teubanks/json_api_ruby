@@ -76,7 +76,6 @@ module JSONAPI
       def attribute(attr)
         @fields ||= []
         @fields << attr
-        create_accessor_methods(:id)
         create_accessor_methods(attr)
       end
 
@@ -106,5 +105,14 @@ module JSONAPI
         create_accessor_methods(object)
       end
     end
+
+    # Define attribute id so it can be set / retrieved
+    # Maps to a method/attribute on the model called :id or uses a method
+    # within the resource class itself. Allows for overridden id attribute like so:
+    #
+    #   def id
+    #     object.uuid # perhaps?
+    #   end
+    attribute :id
   end
 end
