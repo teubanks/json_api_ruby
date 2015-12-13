@@ -1,5 +1,6 @@
 module JSONAPI
   module DSL
+    attr :_primary_key
     attr :fields
     attr :relationships
 
@@ -23,6 +24,10 @@ module JSONAPI
         name: object
       }.merge(options)
       create_accessor_methods(object)
+    end
+
+    def primary_key(key)
+      @_primary_key = key
     end
 
     private

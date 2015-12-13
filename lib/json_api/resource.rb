@@ -2,14 +2,23 @@ module JSONAPI
   class Resource
     extend JSONAPI::DSL
 
-    # Define attribute id so it can be set / retrieved
-    # Maps to a method/attribute on the model called :id or uses a method
-    # within the resource class itself. Allows for overridden id attribute like so:
+    def self.inherited(subclass)
+      subclass.send(:primary_key, :id)
+    end
+
+    # Can be set using `primary_key` in the created resource class like so:
     #
-    #   def id
-    #     object.uuid # perhaps?
-    #   end
-    attribute :id
+    # class ObjectResource < JSONAPI::Resource
+    #   primary_key :uuid
+    # end
+    def id
+      object.public_send(self.class._primary_key)
+    end
+
+    def type
+      _model.class.to_s.underscore.pluralize
+    end
+
     attr_accessor :_model
 
     def initialize(model, options={})
@@ -20,7 +29,7 @@ module JSONAPI
     def to_hash
       resource_hash = {
         'id' =>  self.id,
-        'type' =>  _model.class.to_s.underscore.pluralize
+        'type' =>  self.type
       }
       resource_hash['attributes'] = attributes_hash unless is_relationship?
 
@@ -51,6 +60,7 @@ module JSONAPI
       hash = {}
       self.class.relationships.each do |rel|
         data = _model.send(rel[:name])
+
         if data.kind_of?(Array)
           data = data.map do |d|
             get_relationship_data(d, rel)
@@ -58,9 +68,8 @@ module JSONAPI
         else
           data = get_relationship_data(data, rel)
         end
-        hash[rel[:name].to_s] = {
-          'data' => data
-        }
+
+        hash[rel[:name].to_s] = { 'data' => data }
       end
       hash
     end

@@ -23,14 +23,11 @@ class PhoneResource < JSONAPI::Resource
 end
 
 class CarResource < JSONAPI::Resource
+  primary_key :uuid
   attribute :make
   attribute :model
   attribute :year
   attribute :color
-
-  def id
-    object.uuid
-  end
 end
 
 RSpec.describe JSONAPI::Resource do
