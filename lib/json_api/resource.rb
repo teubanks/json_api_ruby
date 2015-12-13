@@ -1,6 +1,17 @@
 module JSONAPI
   class Resource
+    extend JSONAPI::DSL
+
+    # Define attribute id so it can be set / retrieved
+    # Maps to a method/attribute on the model called :id or uses a method
+    # within the resource class itself. Allows for overridden id attribute like so:
+    #
+    #   def id
+    #     object.uuid # perhaps?
+    #   end
+    attribute :id
     attr_accessor :_model
+
     def initialize(model, options={})
       @_model = model
       @is_relationship = options.fetch(:is_relationship, false)
@@ -68,51 +79,5 @@ module JSONAPI
         Object.const_get("#{resource_name.to_s.classify}Resource")
       end
     end
-
-    class << self
-      attr :fields
-      attr :relationships
-
-      def attribute(attr)
-        @fields ||= []
-        @fields << attr
-        create_accessor_methods(attr)
-      end
-
-      def create_accessor_methods(attr)
-        define_method(attr) do
-          object.public_send(attr)
-        end unless method_defined?(attr)
-
-        define_method("#{attr}=") do |value|
-          object.public_send("#{attr}=", value)
-        end unless method_defined?("#{attr}=")
-      end
-
-      def has_one(object, options={})
-        add_relationship(object, {cardinality: :one}.merge(options))
-      end
-
-      def has_many(object, options={})
-        add_relationship(object, {cardinality: :many}.merge(options))
-      end
-
-      def add_relationship(object, options)
-        @relationships ||= []
-        @relationships << {
-          name: object
-        }.merge(options)
-        create_accessor_methods(object)
-      end
-    end
-
-    # Define attribute id so it can be set / retrieved
-    # Maps to a method/attribute on the model called :id or uses a method
-    # within the resource class itself. Allows for overridden id attribute like so:
-    #
-    #   def id
-    #     object.uuid # perhaps?
-    #   end
-    attribute :id
   end
 end
