@@ -8,7 +8,7 @@ module JSONAPI
 
     def to_hash
       resource_hash = {
-        'id' =>  _model.id,
+        'id' =>  self.id,
         'type' =>  _model.class.to_s.underscore.pluralize
       }
       resource_hash['attributes'] = attributes_hash unless is_relationship?
@@ -41,9 +41,11 @@ module JSONAPI
       self.class.relationships.each do |rel|
         data = _model.send(rel[:name])
         if data.kind_of?(Array)
-          data = data.map {|d| { 'id' => d.id, 'type' => rel[:name].to_s } }
+          data = data.map do |d|
+            get_relationship_data(d, rel)
+          end
         else
-          data = { 'id' => data.id, 'type' => rel[:name].to_s }
+          data = get_relationship_data(data, rel)
         end
         hash[rel[:name].to_s] = {
           'data' => data
@@ -52,19 +54,20 @@ module JSONAPI
       hash
     end
 
-    # def get_relationship_data(rel)
-    #   resource_class = discover_resource(rel[:name], rel)
-    #   resource_class.new(
-    # end
+    def get_relationship_data(model, options)
+      resource_class = discover_resource(options[:name], options)
+      resource_instance = resource_class.new(model, options.merge({is_relationship: true}))
+      resource_instance.to_hash
+    end
 
-    # def discover_resource(resource_name, options={})
-    #   klass = options.fetch(:class_name, nil)
-    #   if klass
-    #     const_get(klass)
-    #   else
-    #     const_get("#{resource_name.classify}Resource")
-    #   end
-    # end
+    def discover_resource(resource_name, options={})
+      klass = options.fetch(:class_name, nil)
+      if klass
+        Object.const_get(klass)
+      else
+        Object.const_get("#{resource_name.to_s.classify}Resource")
+      end
+    end
 
     class << self
       attr :fields
@@ -73,13 +76,18 @@ module JSONAPI
       def attribute(attr)
         @fields ||= []
         @fields << attr
+        create_accessor_methods(:id)
         create_accessor_methods(attr)
       end
 
       def create_accessor_methods(attr)
         define_method(attr) do
-          object.send(attr)
+          object.public_send(attr)
         end unless method_defined?(attr)
+
+        define_method("#{attr}=") do |value|
+          object.public_send("#{attr}=", value)
+        end unless method_defined?("#{attr}=")
       end
 
       def has_one(object, options={})

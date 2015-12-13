@@ -1,32 +1,18 @@
-Phone = Struct.new(:id, :manufacturer, :model, :number) do
-  def self.pluralize
-    'phones'
-  end
-end
-
-Car = Struct.new(:id, :make, :model, :year, :color)do
-  def self.pluralize
-    'cars'
-  end
-end
-
+Phone = Struct.new(:id, :uuid, :manufacturer, :model, :number)
+Car = Struct.new(:id, :uuid, :make, :model, :year, :color)
 Person = Struct.new(:name, :occupation, :address) do
-  def self.pluralize
-    'people'
-  end
-
   def id
     '91f37652-c015-4e04-ba55-815fb5407d12'
   end
 
   def cars
     [
-      Car.new('4c4ceb1b-ce04-41ed-bb15-88c507cebcb8', 'tesla', 'model s', 2016, 'red'),
-      Car.new('a44db3aa-2aa3-4602-89b5-ba67b44cb062', 'tesla', 'model s', 2016, 'black')
+      Car.new(1, '4c4ceb1b-ce04-41ed-bb15-88c507cebcb8', 'tesla', 'model s', 2016, 'red'),
+      Car.new(2, 'a44db3aa-2aa3-4602-89b5-ba67b44cb062', 'tesla', 'model s', 2016, 'black')
     ]
   end
 
   def phone
-    Phone.new('8ce1c5f8-4081-4de2-b126-5dbf31f8aa1e', 'Apple', 'iPhone 6s Plus', '512-867-5309')
+    Phone.new(1, '8ce1c5f8-4081-4de2-b126-5dbf31f8aa1e', 'Apple', 'iPhone 6s Plus', '512-867-5309')
   end
 end

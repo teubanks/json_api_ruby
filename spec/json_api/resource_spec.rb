@@ -22,6 +22,17 @@ class PhoneResource < JSONAPI::Resource
   has_one :person
 end
 
+class CarResource < JSONAPI::Resource
+  attribute :make
+  attribute :model
+  attribute :year
+  attribute :color
+
+  def id
+    object.uuid
+  end
+end
+
 RSpec.describe JSONAPI::Resource do
   it 'should serialize specified attributes' do
     person = Person.new('bob', 'painter', 'heaven')
@@ -60,11 +71,11 @@ RSpec.describe JSONAPI::Resource do
       end
 
       it 'includes the type for the relationship' do
-        expect(serialized_resource['relationships']['phone']['data']['type']).to eq('phone')
+        expect(serialized_resource['relationships']['phone']['data']['type']).to eq('phones')
       end
 
       it 'includes the id for the relationship' do
-        expect(serialized_resource['relationships']['phone']['data']['id']).to eq '8ce1c5f8-4081-4de2-b126-5dbf31f8aa1e'
+        expect(serialized_resource['relationships']['phone']['data']['id']).to eq 1
       end
     end
 
@@ -73,6 +84,7 @@ RSpec.describe JSONAPI::Resource do
         person = Person.new('bob', 'painter', 'heaven')
         PersonResource.new(person).to_hash
       end
+
       it 'includes relationship data' do
         expect(serialized_resource['relationships']['cars']).to_not be_nil
       end
@@ -86,6 +98,7 @@ RSpec.describe JSONAPI::Resource do
       it 'includes the id for the relationship' do
         serialized_resource['relationships']['cars']['data'].map do |car|
           expect(car['id']).to_not be_blank
+          expect(car['id'].length).to eq 36
         end
       end
     end
