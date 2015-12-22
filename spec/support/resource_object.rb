@@ -16,3 +16,31 @@ Person = Struct.new(:name, :occupation, :address) do
     Phone.new(1, '8ce1c5f8-4081-4de2-b126-5dbf31f8aa1e', 'Apple', 'iPhone 6s Plus', '512-867-5309')
   end
 end
+
+class PersonResource < JSONAPI::Resource
+  attribute :name
+  attribute :occupation
+  attribute :address
+  attribute :updated_at
+
+  has_one :phone
+  has_many :cars
+
+  def updated_at
+    1234567890
+  end
+end
+
+class PhoneResource < JSONAPI::Resource
+  attributes :manufacturer, :model, :number
+
+  has_one :person
+end
+
+class CarResource < JSONAPI::Resource
+  primary_key :uuid
+  attribute :make
+  attribute :model
+  attribute :year
+  attribute :color
+end

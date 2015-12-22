@@ -25,25 +25,21 @@ module JSONAPI
 
     def initialize(model, options={})
       @_model = model
-      @is_relationship = options.fetch(:is_relationship, false)
     end
 
     def to_hash
-      resource_hash = {
-        'id' =>  self.id,
-        'type' =>  self.type
-      }
-      resource_hash['attributes'] = attributes_hash unless is_relationship?
+      resource_hash = identifier_hash
+      resource_hash['attributes'] = attributes_hash
 
-      if self.class.relationships.present? && !is_relationship?
-        resource_hash['relationships'] = relationships_hash
+      if self.class.relationships.present?
+        resource_hash['relationships'] = relationship_data
       end
 
       resource_hash
     end
 
-    def is_relationship?
-      @is_relationship == true
+    def identifier_hash
+      { 'id' =>  self.id, 'type' =>  self.type }
     end
 
     def object
@@ -58,7 +54,7 @@ module JSONAPI
       attrs
     end
 
-    def relationships_hash
+    def relationship_data
       hash = {}
       self.class.relationships.each do |rel|
         data = _model.send(rel[:name])
@@ -77,18 +73,38 @@ module JSONAPI
     end
 
     def get_relationship_data(model, options)
-      resource_class = discover_resource(options[:name], options)
-      resource_instance = resource_class.new(model, options.merge({is_relationship: true}))
-      resource_instance.to_hash
+      resource_class = discover_resource(options[:name].to_s.singularize, options)
+      resource_instance = resource_class.new(model)
+      resource_instance.identifier_hash
     end
 
     def discover_resource(resource_name, options={})
-      klass = options.fetch(:class_name, nil)
-      if klass
-        Object.const_get(klass)
+      namespace = options.fetch(:namespace, nil)
+      klass = options.fetch(:resource_class, nil)
+
+      klass = resource_class(resource_name, namespace) if klass.blank?
+
+      Object.const_get(klass)
+    end
+
+    def resource_class(resource_name, namespace=nil)
+      if namespace
+        klass = [
+          namespace.to_s.underscore,
+          "#{resource_name.to_s.underscore}_resource"
+        ].join('/').classify
       else
-        Object.const_get("#{resource_name.to_s.classify}Resource")
+        klass = resource_path(resource_name).join.classify
       end
+      klass
+    end
+
+    def resource_path(resource_name)
+      current_namespace = self.class.to_s.underscore.split('/')
+      current_namespace.pop
+      current_namespace << '/' if current_namespace.present?
+      current_namespace << "#{resource_name.to_s}_resource"
+      current_namespace
     end
   end
 end

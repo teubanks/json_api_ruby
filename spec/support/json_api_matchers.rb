@@ -21,9 +21,10 @@ end
 
 RSpec::Matchers.define :be_valid_json_api do
   match do |actual|
-    return false unless actual.is_a?(Hash)
+    is_a_hash = actual.is_a?(Hash)
     actual.stringify_keys
-    return false unless actual['id'] && actual['type']
-    true
+    has_id_and_type = actual['id'].present? && actual['type'].present?
+
+    is_a_hash && has_id_and_type
   end
 end
