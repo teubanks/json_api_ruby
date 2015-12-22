@@ -29,70 +29,66 @@ class CarResource < JSONAPI::Resource
 end
 
 RSpec.describe JSONAPI::Resource do
-  it 'should serialize specified attributes' do
+  subject(:serialized_person) do
     person = Person.new('bob', 'painter', 'heaven')
-    expected_hash = {
-      id: '91f37652-c015-4e04-ba55-815fb5407d12',
-      type: 'people',
-      attributes: {
-        name: 'bob',
-        occupation: 'painter',
-        address: 'heaven',
-        updated_at: 1234567890
-      }
-    }
-
-    serialized = PersonResource.new(person).to_hash
-    expect(serialized['id']).to eq expected_hash[:id]
-    expect(serialized['type']).to eq expected_hash[:type]
-    expect(serialized['attributes']).to eq expected_hash[:attributes].stringify_keys
+    PersonResource.new(person).to_hash
   end
 
-  it 'uses methods as defined on the resource object' do
-    person = Person.new('bob', 'painter', 'heaven')
-    serialized = PersonResource.new(person).to_hash
-    expect(serialized['attributes']['updated_at']).to be_present
+  it 'is follows the JSON API spec' do
+    expect(serialized_person).to be_valid_json_api
+  end
+
+  it 'has a name with the value "bob"' do
+    expect(serialized_person).to have_attribute(:name).with_value('bob')
+  end
+
+  it 'has an occupation with the value "painter"' do
+    expect(serialized_person).to have_attribute(:occupation).with_value('painter')
+  end
+
+  it 'has an address with the value "heaven"' do
+    expect(serialized_person).to have_attribute(:address).with_value('heaven')
+  end
+
+  it 'has an updated_at timestamp with the value "1234567890"' do
+    expect(serialized_person).to have_attribute(:updated_at).with_value(1234567890)
   end
 
   describe 'relationships' do
     context 'with a cardinality of one' do
-      let(:serialized_resource) do
+      subject(:serialized_resource) do
         person = Person.new('bob', 'painter', 'heaven')
         PersonResource.new(person).to_hash
       end
 
       it 'includes the relationship keys' do
-        expect(serialized_resource['relationships']['phone']).to_not be_nil
+        expect(serialized_resource).to have_relationship('phone')
       end
 
-      it 'includes the type for the relationship' do
-        expect(serialized_resource['relationships']['phone']['data']['type']).to eq('phones')
-      end
-
-      it 'includes the id for the relationship' do
-        expect(serialized_resource['relationships']['phone']['data']['id']).to eq 1
+      it 'have a valid phone relationship' do
+        expect(serialized_resource['relationships']['phone']['data']).to be_valid_json_api
       end
     end
 
     context 'with a cardinality of many' do
-      let(:serialized_resource) do
+      subject(:serialized_resource) do
         person = Person.new('bob', 'painter', 'heaven')
         PersonResource.new(person).to_hash
       end
 
       it 'includes relationship data' do
-        expect(serialized_resource['relationships']['cars']).to_not be_nil
+        expect(serialized_resource).to have_relationship('cars')
       end
 
       it 'includes the type for the relationship' do
         serialized_resource['relationships']['cars']['data'].map do |car|
+          expect(car).to be_valid_json_api
           expect(car['type']).to eq 'cars'
         end
       end
 
       it 'includes the id for the relationship' do
         serialized_resource['relationships']['cars']['data'].map do |car|
-          expect(car['id']).to_not be_blank
           expect(car['id'].length).to eq 36
         end
       end
