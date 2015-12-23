@@ -67,40 +67,15 @@ RSpec.describe JSONAPI::Resource do
     end
   end
 
-  describe 'resource discovery' do
-    module Namespace
-      class OneResource < JSONAPI::Resource
-      end
 
-      class TwoResource < JSONAPI::Resource
-      end
+  describe 'link paths' do
+    let(:person) { Person.new('bob', 'painter', 'heaven') }
+    subject(:serialized_person) do
+      PersonResource.new(person).to_hash
     end
 
-    module DifferentNamespace
-      class ThreeResource < JSONAPI::Resource
-      end
-    end
-
-    it 'finds a resource class created within the same namespace' do
-      rs1 = Namespace::OneResource.new(nil)
-      expect(rs1.discover_resource(:two)).to eq Namespace::TwoResource
-    end
-
-    it 'allows specifying a different namespace' do
-      rs1 = Namespace::OneResource.new(nil)
-      expect(rs1.discover_resource(:three, namespace: 'different_namespace')).to eq DifferentNamespace::ThreeResource
-    end
-
-    it 'allows explicitly providing a resource class' do
-      rs1 = Namespace::OneResource.new(nil)
-      expect(rs1.discover_resource(:two, resource_class: 'DifferentNamespace::ThreeResource')).to eq DifferentNamespace::ThreeResource
-    end
-
-    it "raises an error if the resource can't be found" do
-      rs1 = Namespace::OneResource.new(nil)
-      expect {
-        rs1.discover_resource(:not_a)
-      }.to raise_error JSONAPI::ResourceNotFound
+    it 'returns a full URL to the resource' do
+      expect(serialized_person['links']['self']).to eq("http://localhost:3000/people/#{person.id}")
     end
   end
 end

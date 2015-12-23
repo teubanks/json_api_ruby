@@ -44,3 +44,18 @@ class CarResource < JSONAPI::Resource
   attribute :year
   attribute :color
 end
+
+# namespaced modules
+module Namespace
+  class OneResource < JSONAPI::Resource
+  end
+
+  class TwoResource < JSONAPI::Resource
+  end
+end
+
+module DifferentNamespace
+  class ThreeResource < JSONAPI::Resource
+  end
+end
+
