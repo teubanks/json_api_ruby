@@ -67,7 +67,6 @@ RSpec.describe JSONAPI::Resource do
     end
   end
 
-
   describe 'link paths' do
     let(:person) { Person.new('bob', 'painter', 'heaven') }
     subject(:serialized_person) do

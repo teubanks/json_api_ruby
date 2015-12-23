@@ -1,8 +1,10 @@
 require_relative 'resources/base'
+require_relative 'resources/dsl'
+
 module JSONAPI
   class Resource
     include Resources::Base
-    extend JSONAPI::DSL
+    extend Resources::DSL
 
     def self.inherited(subclass)
       subclass.send(:id_field, :id)
