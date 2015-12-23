@@ -1,6 +1,6 @@
 module JSONAPI
   module DSL
-    attr :_primary_key
+    attr :_id_field
     attr :fields
     attr :relationships
 
@@ -24,8 +24,8 @@ module JSONAPI
       add_relationship(object, {cardinality: :many}.merge(options))
     end
 
-    def primary_key(key)
-      @_primary_key = key
+    def id_field(key)
+      @_id_field = key
     end
 
     private

@@ -95,5 +95,12 @@ RSpec.describe JSONAPI::Resource do
       rs1 = Namespace::OneResource.new(nil)
       expect(rs1.discover_resource(:two, resource_class: 'DifferentNamespace::ThreeResource')).to eq DifferentNamespace::ThreeResource
     end
+
+    it "raises an error if the resource can't be found" do
+      rs1 = Namespace::OneResource.new(nil)
+      expect {
+        rs1.discover_resource(:not_a)
+      }.to raise_error JSONAPI::ResourceNotFound
+    end
   end
 end

@@ -3,22 +3,38 @@ module JSONAPI
     extend JSONAPI::DSL
 
     def self.inherited(subclass)
-      subclass.send(:primary_key, :id)
+      subclass.send(:id_field, :id)
     end
 
-    # Can be set using `primary_key` in the created resource class like so:
+    # Can be set using `id_field` in the created resource class like so:
     #
     # class ObjectResource < JSONAPI::Resource
-    #   primary_key :uuid
+    #   id_field :uuid
     # end
     #
     # defaults to :id
     def id
-      object.public_send(self.class._primary_key)
+      object.public_send(self.class._id_field)
     end
 
+    # Can be overridden in a subclass
     def type
       _model.class.to_s.underscore.pluralize
+    end
+
+    # Makes the underlying object available to subclasses so we can do things
+    # like
+    #
+    #   class PersonResource
+    #     attribute :email
+    #     attribute :full_name
+    #
+    #     def full_name
+    #       "#{object.first_name} #{object.last_name}"
+    #     end
+    #   end
+    def object
+      _model
     end
 
     attr_accessor :_model
@@ -40,10 +56,6 @@ module JSONAPI
 
     def identifier_hash
       { 'id' =>  self.id, 'type' =>  self.type }
-    end
-
-    def object
-      _model
     end
 
     def attributes_hash
@@ -85,6 +97,8 @@ module JSONAPI
       klass = resource_class(resource_name, namespace) if klass.blank?
 
       Object.const_get(klass)
+    rescue NameError
+      fail ::JSONAPI::ResourceNotFound.new("Could not find resource class `#{klass}'")
     end
 
     def resource_class(resource_name, namespace=nil)

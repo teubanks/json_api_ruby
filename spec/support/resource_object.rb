@@ -38,7 +38,7 @@ class PhoneResource < JSONAPI::Resource
 end
 
 class CarResource < JSONAPI::Resource
-  primary_key :uuid
+  id_field :uuid
   attribute :make
   attribute :model
   attribute :year
