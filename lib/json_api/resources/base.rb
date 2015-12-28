@@ -2,12 +2,12 @@ require_relative 'discovery'
 module JSONAPI
   module Resources
     module Base
-      def to_hash
+      def to_hash(options={})
         resource_hash = identifier_hash
         resource_hash['attributes'] = attributes_hash
 
-        if self.class.relationships.present?
-          resource_hash['relationships'] = relationship_objects
+        if self.class.relationships.present? && options[:include].present?
+          resource_hash['relationships'] = relationship_data
         end
 
         resource_hash['links'] = links_hash
@@ -36,6 +36,7 @@ module JSONAPI
       end
 
       def relationship_objects
+        {}
       end
     end
   end

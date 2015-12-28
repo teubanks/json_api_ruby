@@ -26,7 +26,7 @@ module JSONAPI
       end
 
       def get_relationship_data(model, options)
-        resource_class = Discovery.resource_for_name(options[:name].to_s.singularize, options.merge(parent_resource: self))
+        resource_class = Discovery.resource_for_name(model, options.merge(parent_resource: self))
         resource_instance = resource_class.new(model)
         resource_instance.identifier_hash
       end

@@ -10,16 +10,16 @@ RSpec.describe JSONAPI::Resource do
     expect(serialized_person).to be_valid_json_api
   end
 
-  it 'has a name with the value "bob"' do
-    expect(serialized_person).to have_attribute(:name).with_value('bob')
+  it 'has a name with the value "Brad J. Armbruster"' do
+    expect(serialized_person).to have_attribute(:name).with_value('Brad J. Armbruster')
   end
 
-  it 'has an occupation with the value "painter"' do
-    expect(serialized_person).to have_attribute(:occupation).with_value('painter')
+  it 'has an email with the value "ace@airforce.mil"' do
+    expect(serialized_person).to have_attribute(:email_address).with_value('ace@airforce.mil')
   end
 
-  it 'has an address with the value "heaven"' do
-    expect(serialized_person).to have_attribute(:address).with_value('heaven')
+  it 'has a created_at field' do
+    expect(serialized_person).to have_attribute(:created_at)
   end
 
   it 'has an updated_at timestamp' do
@@ -29,7 +29,7 @@ RSpec.describe JSONAPI::Resource do
   describe 'relationships' do
     subject(:serialized_resource) do
       article = Person.new('Anatoly Fyodorovich Krimov', 'red_star@kremlin.mil').articles.first
-      ArticleResource.new(article).to_hash
+      ArticleResource.new(article).to_hash(include: [:author, :comments])
     end
 
     context 'with a cardinality of one' do

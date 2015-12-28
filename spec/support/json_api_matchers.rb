@@ -11,10 +11,12 @@ RSpec::Matchers.define :have_attribute do |key_name|
   match do |actual|
     attributes = Hash(actual).stringify_keys['attributes']
     return false unless attributes.keys.include?(key_name.to_s)
+    return true if @chained.blank?
     attributes[key_name.to_s] == @expected_value
   end
 
   chain :with_value do |key_value|
+    @chained = true
     @expected_value = key_value
   end
 end

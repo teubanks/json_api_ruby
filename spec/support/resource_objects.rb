@@ -26,15 +26,21 @@ end
 class Article
   include Identifiers
   attr_accessor :publish_date, :title, :short_description, :created_at, :updated_at
+  attr_reader :author
   attr_reader :comments
 
-  def initialize(title, desc)
+  def initialize(title, desc, author=nil)
     @publish_date = Time.now
     @created_at = 2.days.ago
     @updated_at = 1.day.ago
     @title = title
     @short_description = desc
+    @author = author
     generate_comments
+  end
+
+  def author
+    @author ||= Person.new('Ettienne R. LaFitte', 'gung_ho@recondo.mil')
   end
 
   def generate_comments
@@ -57,7 +63,7 @@ class Person
   end
 
   def articles
-    [ Article.new("How to Conquer the World", "10 simple steps to world domination") ]
+    [ Article.new("How to Conquer the World", "10 simple steps to world domination", self) ]
   end
 end
 
@@ -84,6 +90,12 @@ class CommentResource < JSONAPI::Resource
   attribute :comment_text
   attribute :created_at
   attribute :updated_at
+end
+
+class Two
+end
+
+class Three
 end
 
 # namespaced modules
