@@ -7,7 +7,7 @@ module JSONAPI
         resource_hash['attributes'] = attributes_hash
 
         if self.class.relationships.present?
-          resource_hash['relationships'] = relationship_data
+          resource_hash['relationships'] = relationship_objects
         end
 
         resource_hash['links'] = links_hash
@@ -20,7 +20,11 @@ module JSONAPI
       end
 
       def links_hash
-        { 'self' => JSONAPI.configuration.base_url + "/#{self.type}/#{self.id}" }
+        { 'self' => JSONAPI.configuration.base_url + self_link_path }
+      end
+
+      def self_link_path
+        "/#{self.type}/#{self.id}"
       end
 
       def attributes_hash
@@ -31,28 +35,7 @@ module JSONAPI
         attrs
       end
 
-      def relationship_data
-        hash = {}
-        self.class.relationships.each do |rel|
-          data = _model.send(rel[:name])
-
-          if data.kind_of?(Array)
-            data = data.map do |d|
-              get_relationship_data(d, rel)
-            end
-          else
-            data = get_relationship_data(data, rel)
-          end
-
-          hash[rel[:name].to_s] = { 'data' => data }
-        end
-        hash
-      end
-
-      def get_relationship_data(model, options)
-        resource_class = Discovery.resource_for_name(options[:name].to_s.singularize, options.merge(parent_resource: self))
-        resource_instance = resource_class.new(model)
-        resource_instance.identifier_hash
+      def relationship_objects
       end
     end
   end
