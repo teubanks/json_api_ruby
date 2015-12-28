@@ -1,48 +1,89 @@
-Phone = Struct.new(:id, :uuid, :manufacturer, :model, :number)
-Car = Struct.new(:id, :uuid, :make, :model, :year, :color)
-Person = Struct.new(:name, :occupation, :address) do
+module Identifiers
   def id
-    '91f37652-c015-4e04-ba55-815fb5407d12'
+    self.object_id
   end
 
-  def cars
-    [
-      Car.new(1, '4c4ceb1b-ce04-41ed-bb15-88c507cebcb8', 'tesla', 'model s', 2016, 'red'),
-      Car.new(2, 'a44db3aa-2aa3-4602-89b5-ba67b44cb062', 'tesla', 'model s', 2016, 'black')
+  def uuid
+    @uuid ||= SecureRandom.uuid
+  end
+end
+
+class Comment
+  include Identifiers
+  attr_accessor :author, :comment_text, :created_at, :updated_at
+
+  def initialize(comment_text)
+    @created_at = 1.day.ago
+    @updated_at = 30.minutes.ago
+    assign_author
+  end
+
+  def assign_author
+    @author = Person.new('Archibald Monev', 'dr_venom@cobra.mil')
+  end
+end
+
+class Article
+  include Identifiers
+  attr_accessor :publish_date, :title, :short_description, :created_at, :updated_at
+  attr_reader :comments
+
+  def initialize(title, desc)
+    @publish_date = Time.now
+    @created_at = 2.days.ago
+    @updated_at = 1.day.ago
+    @title = title
+    @short_description = desc
+    generate_comments
+  end
+
+  def generate_comments
+    @comments = [
+      Comment.new("This article really cleared it up for me"),
+      Comment.new("No idea what comment 1 is all about, this article was a muddled mess")
     ]
   end
+end
 
-  def phone
-    Phone.new(1, '8ce1c5f8-4081-4de2-b126-5dbf31f8aa1e', 'Apple', 'iPhone 6s Plus', '512-867-5309')
+class Person
+  include Identifiers
+  attr_accessor :name, :email_address, :created_at, :updated_at
+
+  def initialize(name, email)
+    @name = name
+    @email_address = email
+    @created_at = 1.month.ago
+    @updated_at = 1.month.ago
+  end
+
+  def articles
+    [ Article.new("How to Conquer the World", "10 simple steps to world domination") ]
   end
 end
 
 class PersonResource < JSONAPI::Resource
   attribute :name
-  attribute :occupation
-  attribute :address
+  attribute :email_address
+  attribute :created_at
   attribute :updated_at
 
-  has_one :phone
-  has_many :cars
-
-  def updated_at
-    1234567890
-  end
+  has_many :articles
 end
 
-class PhoneResource < JSONAPI::Resource
-  attributes :manufacturer, :model, :number
-
-  has_one :person
-end
-
-class CarResource < JSONAPI::Resource
+class ArticleResource < JSONAPI::Resource
   id_field :uuid
-  attribute :make
-  attribute :model
-  attribute :year
-  attribute :color
+  attributes :publish_date, :title, :short_description, :created_at, :updated_at
+
+  has_one :author
+  has_many :comments
+end
+
+class CommentResource < JSONAPI::Resource
+  id_field :uuid
+  attribute :author
+  attribute :comment_text
+  attribute :created_at
+  attribute :updated_at
 end
 
 # namespaced modules
