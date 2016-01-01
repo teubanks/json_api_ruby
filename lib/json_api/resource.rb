@@ -1,6 +1,11 @@
+require_relative 'resources/base'
+require_relative 'resources/relationships'
+require_relative 'resources/dsl'
+
 module JSONAPI
   class Resource
-    extend JSONAPI::DSL
+    include Resources::Base
+    extend Resources::DSL
 
     def self.inherited(subclass)
       subclass.send(:id_field, :id)
@@ -25,7 +30,7 @@ module JSONAPI
     # Makes the underlying object available to subclasses so we can do things
     # like
     #
-    #   class PersonResource
+    #   class PersonResource < JSONAPI::Resource
     #     attribute :email
     #     attribute :full_name
     #
@@ -41,84 +46,6 @@ module JSONAPI
 
     def initialize(model, options={})
       @_model = model
-    end
-
-    def to_hash
-      resource_hash = identifier_hash
-      resource_hash['attributes'] = attributes_hash
-
-      if self.class.relationships.present?
-        resource_hash['relationships'] = relationship_data
-      end
-
-      resource_hash
-    end
-
-    def identifier_hash
-      { 'id' =>  self.id, 'type' =>  self.type }
-    end
-
-    def attributes_hash
-      attrs = {}
-      self.class.fields.each do |attr|
-        attrs[attr.to_s] = send(attr)
-      end
-      attrs
-    end
-
-    def relationship_data
-      hash = {}
-      self.class.relationships.each do |rel|
-        data = _model.send(rel[:name])
-
-        if data.kind_of?(Array)
-          data = data.map do |d|
-            get_relationship_data(d, rel)
-          end
-        else
-          data = get_relationship_data(data, rel)
-        end
-
-        hash[rel[:name].to_s] = { 'data' => data }
-      end
-      hash
-    end
-
-    def get_relationship_data(model, options)
-      resource_class = discover_resource(options[:name].to_s.singularize, options)
-      resource_instance = resource_class.new(model)
-      resource_instance.identifier_hash
-    end
-
-    def discover_resource(resource_name, options={})
-      namespace = options.fetch(:namespace, nil)
-      klass = options.fetch(:resource_class, nil)
-
-      klass = resource_class(resource_name, namespace) if klass.blank?
-
-      Object.const_get(klass)
-    rescue NameError
-      fail ::JSONAPI::ResourceNotFound.new("Could not find resource class `#{klass}'")
-    end
-
-    def resource_class(resource_name, namespace=nil)
-      if namespace
-        klass = [
-          namespace.to_s.underscore,
-          "#{resource_name.to_s.underscore}_resource"
-        ].join('/').classify
-      else
-        klass = resource_path(resource_name).join.classify
-      end
-      klass
-    end
-
-    def resource_path(resource_name)
-      current_namespace = self.class.to_s.underscore.split('/')
-      current_namespace.pop
-      current_namespace << '/' if current_namespace.present?
-      current_namespace << "#{resource_name.to_s}_resource"
-      current_namespace
     end
   end
 end

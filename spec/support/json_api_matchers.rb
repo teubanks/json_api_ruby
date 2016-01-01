@@ -11,10 +11,12 @@ RSpec::Matchers.define :have_attribute do |key_name|
   match do |actual|
     attributes = Hash(actual).stringify_keys['attributes']
     return false unless attributes.keys.include?(key_name.to_s)
+    return true if @chained.blank?
     attributes[key_name.to_s] == @expected_value
   end
 
   chain :with_value do |key_value|
+    @chained = true
     @expected_value = key_value
   end
 end
@@ -26,5 +28,13 @@ RSpec::Matchers.define :be_valid_json_api do
     has_id_and_type = actual['id'].present? && actual['type'].present?
 
     is_a_hash && has_id_and_type
+  end
+end
+
+RSpec::Matchers.define :have_links_for do |expected|
+  match do |actual|
+    relationships = Hash(actual).stringify_keys['relationships']
+    relation = Hash(relationships)[expected]
+    Hash(relation).keys.include?('links')
   end
 end

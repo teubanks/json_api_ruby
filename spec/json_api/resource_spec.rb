@@ -2,7 +2,7 @@ require 'spec_helper'
 
 RSpec.describe JSONAPI::Resource do
   subject(:serialized_person) do
-    person = Person.new('bob', 'painter', 'heaven')
+    person = Person.new('Brad J. Armbruster', 'ace@airforce.mil')
     PersonResource.new(person).to_hash
   end
 
@@ -10,97 +10,81 @@ RSpec.describe JSONAPI::Resource do
     expect(serialized_person).to be_valid_json_api
   end
 
-  it 'has a name with the value "bob"' do
-    expect(serialized_person).to have_attribute(:name).with_value('bob')
+  it 'has a name with the value "Brad J. Armbruster"' do
+    expect(serialized_person).to have_attribute(:name).with_value('Brad J. Armbruster')
   end
 
-  it 'has an occupation with the value "painter"' do
-    expect(serialized_person).to have_attribute(:occupation).with_value('painter')
+  it 'has an email with the value "ace@airforce.mil"' do
+    expect(serialized_person).to have_attribute(:email_address).with_value('ace@airforce.mil')
   end
 
-  it 'has an address with the value "heaven"' do
-    expect(serialized_person).to have_attribute(:address).with_value('heaven')
+  it 'has a created_at field' do
+    expect(serialized_person).to have_attribute(:created_at)
   end
 
-  it 'has an updated_at timestamp with the value "1234567890"' do
-    expect(serialized_person).to have_attribute(:updated_at).with_value(1234567890)
+  it 'has an updated_at timestamp' do
+    expect(serialized_person).to have_attribute(:updated_at)
   end
 
   describe 'relationships' do
-    context 'with a cardinality of one' do
-      subject(:serialized_resource) do
-        person = Person.new('bob', 'painter', 'heaven')
-        PersonResource.new(person).to_hash
-      end
+    subject(:serialized_article) do
+      article = Person.new('Anatoly Fyodorovich Krimov', 'red_star@kremlin.mil').articles.first
+      ArticleResource.new(article).to_hash(include: [:author, :comments])
+    end
 
+    context 'with a cardinality of one' do
       it 'includes the relationship keys' do
-        expect(serialized_resource).to have_relationship('phone')
+        expect(serialized_article).to have_relationship('author')
       end
 
       it 'have a valid phone relationship' do
-        expect(serialized_resource['relationships']['phone']['data']).to be_valid_json_api
+        expect(serialized_article['relationships']['author']['data']).to be_valid_json_api
       end
     end
 
     context 'with a cardinality of many' do
-      subject(:serialized_resource) do
-        person = Person.new('bob', 'painter', 'heaven')
-        PersonResource.new(person).to_hash
-      end
-
       it 'includes relationship data' do
-        expect(serialized_resource).to have_relationship('cars')
+        expect(serialized_article).to have_relationship('comments')
       end
 
       it 'includes the type for the relationship' do
-        serialized_resource['relationships']['cars']['data'].map do |car|
-          expect(car).to be_valid_json_api
-          expect(car['type']).to eq 'cars'
+        serialized_article['relationships']['comments']['data'].map do |comment|
+          expect(comment).to be_valid_json_api
+          expect(comment['type']).to eq 'comments'
         end
       end
 
       it 'includes the id for the relationship' do
-        serialized_resource['relationships']['cars']['data'].map do |car|
-          expect(car['id'].length).to eq 36
+        serialized_article['relationships']['comments']['data'].map do |comment|
+          expect(comment['id'].length).to eq 36
         end
+      end
+    end
+
+    context 'relationship links' do
+      subject(:serialized_article) do
+        article = Person.new('Anatoly Fyodorovich Krimov', 'red_star@kremlin.mil').articles.first
+        ArticleResource.new(article).to_hash
+      end
+
+      it 'includes links to for the comments relationship' do
+        expect(serialized_article).to have_links_for('comments')
+      end
+
+      it 'includes links for the author relationship' do
+        expect(serialized_article).to have_links_for('author')
       end
     end
   end
 
-  describe 'resource discovery' do
-    module Namespace
-      class OneResource < JSONAPI::Resource
-      end
-
-      class TwoResource < JSONAPI::Resource
-      end
+  describe 'link paths' do
+    let(:person) { Person.new('Sherman R. Guderian', 'heavy_metal@airforce.mil') }
+    subject(:serialized_person) do
+      PersonResource.new(person).to_hash
     end
 
-    module DifferentNamespace
-      class ThreeResource < JSONAPI::Resource
-      end
-    end
-
-    it 'finds a resource class created within the same namespace' do
-      rs1 = Namespace::OneResource.new(nil)
-      expect(rs1.discover_resource(:two)).to eq Namespace::TwoResource
-    end
-
-    it 'allows specifying a different namespace' do
-      rs1 = Namespace::OneResource.new(nil)
-      expect(rs1.discover_resource(:three, namespace: 'different_namespace')).to eq DifferentNamespace::ThreeResource
-    end
-
-    it 'allows explicitly providing a resource class' do
-      rs1 = Namespace::OneResource.new(nil)
-      expect(rs1.discover_resource(:two, resource_class: 'DifferentNamespace::ThreeResource')).to eq DifferentNamespace::ThreeResource
-    end
-
-    it "raises an error if the resource can't be found" do
-      rs1 = Namespace::OneResource.new(nil)
-      expect {
-        rs1.discover_resource(:not_a)
-      }.to raise_error JSONAPI::ResourceNotFound
+    it 'returns a full URL to the resource' do
+      expect(serialized_person['links']['self']).to eq("http://localhost:3000/people/#{person.id}")
     end
   end
 end
