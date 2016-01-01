@@ -5,7 +5,6 @@ require_relative 'resources/dsl'
 module JSONAPI
   class Resource
     include Resources::Base
-    include Resources::Relationships
     extend Resources::DSL
 
     def self.inherited(subclass)

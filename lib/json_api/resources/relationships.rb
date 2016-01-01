@@ -1,41 +1,57 @@
 module JSONAPI
   module Resources
 
-    module Relationships
+    class Relationships
+      attr_reader :name
+      attr_reader :parent
+      def initialize(name, options)
+        @name = name.to_s
+      end
+
+      def serialize(parent)
+        @parent = parent
+        {}.merge(relationship_links).merge(relationship_data)
+      end
+
       def relationship_links
-        hash = {}
-        self.class.relationships.each do |rel|
-          hash[rel[:name].to_s] = {
-            'links' => {
-              'self' => self_link_path + "/relationships/#{rel[:name]}",
-              'related' => ''
-            }
+        {
+          'links' => {
+            'self' => parent.self_link_path + "/relationships/#{name}",
+            'related' => ''
           }
-        end
+        }
       end
 
       def relationship_data(options={})
-        hash = {}
-        self.class.relationships.each do |rel|
-          data = _model.send(rel[:name])
+        data = parent.object.send(name)
 
-          if data.kind_of?(Array)
-            data = data.map do |d|
-              get_relationship_data(d, rel)
-            end
-          else
-            data = get_relationship_data(data, rel)
+        if data.kind_of?(Array)
+          data = data.map do |d|
+            get_relationship_identity(d)
           end
-
-          hash[rel[:name].to_s] = { 'data' => data }
+        else
+          data = get_relationship_identity(data)
         end
-        hash
+
+        { 'data' => data }
       end
 
-      def get_relationship_data(model, options)
-        resource_class = Discovery.resource_for_name(model, options.merge(parent_resource: self))
+      def get_relationship_identity(model, options={})
+        resource_class = Discovery.resource_for_name(model, options.merge(parent_resource: parent))
         resource_instance = resource_class.new(model)
         resource_instance.identifier_hash
+      end
+    end
+
+    class ToOneRelationship < Relationships
+      def cardinality
+        :one
+      end
+    end
+
+    class ToManyRelationship < Relationships
+      def cardinality
+        :many
       end
     end
 

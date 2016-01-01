@@ -17,12 +17,12 @@ module JSONAPI
         create_accessor_methods(attr)
       end
 
-      def has_one(object, options={})
-        add_relationship(object, {cardinality: :one}.merge(options))
+      def has_one(object_name, options={})
+        add_relationship(object_name, :one, options)
       end
 
-      def has_many(object, options={})
-        add_relationship(object, {cardinality: :many}.merge(options))
+      def has_many(object_name, options={})
+        add_relationship(object_name, :many, options)
       end
 
       def id_field(key)
@@ -30,12 +30,14 @@ module JSONAPI
       end
 
       private
-      def add_relationship(object, options)
+      def add_relationship(object_name, cardinality, options)
         @relationships ||= []
-        @relationships << {
-          name: object
-        }.merge(options)
-        create_accessor_methods(object)
+        if cardinality == :one
+          @relationships << ToOneRelationship.new(object_name, options)
+        else
+          @relationships << ToManyRelationship.new(object_name, options)
+        end
+        create_accessor_methods(object_name)
       end
 
       def create_accessor_methods(attr)

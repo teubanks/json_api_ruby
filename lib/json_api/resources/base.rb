@@ -7,8 +7,9 @@ module JSONAPI
         resource_hash = identifier_hash
         resource_hash['attributes'] = attributes_hash
 
-        if self.class.relationships.present?
-          resource_hash['relationships'] = relationship_data(include: options[:include])
+        self.class.relationships.each do |relationship|
+          resource_hash['relationships'] ||= {}
+          resource_hash['relationships'][relationship.name] = relationship.serialize(self)
         end
 
         resource_hash['links'] = links_hash
