@@ -9,15 +9,21 @@ RSpec.describe JSONAPI::Resources::Relationships do
     ArticleResource.new(article)
   end
 
-  let(:relationship_object) do
+  let(:author_relation) do
     article_resource.class.relationships.find do |rel|
       rel.name == 'author'
     end
   end
 
+  let(:comments_relation) do
+    article_resource.class.relationships.find do |rel|
+      rel.name == 'comments'
+    end
+  end
+
   describe 'link serialization' do
     subject(:links_object) do
-      relationship_object.serialize(parent_resource: article_resource)
+      author_relation.serialize(parent_resource: article_resource)
     end
 
     it 'includes a links object' do
@@ -46,33 +52,51 @@ RSpec.describe JSONAPI::Resources::Relationships do
   end
 
   describe 'data serialization' do
-    it 'has a data top level object'
+    subject(:serialized_object) do
+      author_relation.serialize(parent_resource: article_resource, included: true)
+    end
+
+    it 'has a data top level object' do
+      expect(serialized_object).to include('data')
+    end
+
     describe 'data object' do
       context 'when an array' do
-        it 'has an identity hash for each object'
+        subject(:serialized_object) do
+          comments_relation.serialize(parent_resource: article_resource, included: true)
+        end
+
+        it 'has an identity hash for each object' do
+          expect(serialized_object['data'].flat_map(&:keys).uniq).to eq ['id', 'type']
+        end
       end
 
       context 'when a single object' do
-        it 'has an identity hash'
+        it 'has an identity hash' do
+          expect(serialized_object['data'].keys).to eq ['id', 'type']
+        end
       end
     end
   end
 
   describe 'identity hash' do
-    it 'returns an identity hash given a model and parent resource'
+    it 'returns an identity hash given a model and parent resource' do
+      serialized_object = author_relation.serialize(parent_resource: article_resource, included: true)
+      expect(serialized_object['data'].keys).to eq ['id', 'type']
+    end
   end
 
   describe 'relationship serialization' do
     context 'when the option "include" is true' do
       it 'includes the data object' do
-        serialized_data = relationship_object.serialize(parent_resource: article_resource, included: true)
+        serialized_data = author_relation.serialize(parent_resource: article_resource, included: true)
         expect(serialized_data).to include('data')
       end
     end
 
     context 'when the option "include" is falsey' do
       it 'does not include data object' do
-        serialized_data = relationship_object.serialize(parent_resource: article_resource)
+        serialized_data = author_relation.serialize(parent_resource: article_resource)
         expect(serialized_data).to_not include('data')
       end
     end
