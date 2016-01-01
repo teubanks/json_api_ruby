@@ -63,13 +63,18 @@ RSpec.describe JSONAPI::Resources::Relationships do
   end
 
   describe 'relationship serialization' do
-    it 'has a links object'
     context 'when the option "include" is true' do
-      it 'includes the data object'
+      it 'includes the data object' do
+        serialized_data = relationship_object.serialize(parent_resource: article_resource, included: true)
+        expect(serialized_data).to include('data')
+      end
     end
 
     context 'when the option "include" is falsey' do
-      it 'does not include data object'
+      it 'does not include data object' do
+        serialized_data = relationship_object.serialize(parent_resource: article_resource)
+        expect(serialized_data).to_not include('data')
+      end
     end
   end
 end

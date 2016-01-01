@@ -2,15 +2,42 @@ module JSONAPI
   module Resources
 
     class Relationships
+      # The name of this relationship.
+      #   This name comes from the resource object that defines the
+      #   relationship. Example:
+      #     class ArticleResource < JSONAPI::Resource
+      #       has_one :author # this is the name of this relationship
+      #     end
       attr_reader :name
+
+      # The resource object that "owns" this relationship
+      #
+      # Example:
+      #   class ArticleResource < JSONAPI::Resource
+      #     has_one :author
+      #   end
+      #
+      # `ArticleResource` is the parent of the author object
       attr_reader :parent
+
+      # Determines whether the `data` attribute should be filled out and
+      # included
+      attr_reader :included
+
       def initialize(name, options)
         @name = name.to_s
       end
 
       def serialize(options)
         @parent = options.fetch(:parent_resource)
-        {}.merge(links).merge(data)
+        @included = options.fetch(:included, false)
+        return_hash = links
+        return_hash.merge!(data) if included?
+        return_hash
+      end
+
+      def included?
+        included == true
       end
 
       def links
