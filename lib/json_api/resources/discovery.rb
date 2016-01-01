@@ -1,4 +1,4 @@
-module JSONAPI
+module JsonApi
   module Resources
     class Discovery
       def self.resource_for_name(model, options={})
@@ -10,7 +10,7 @@ module JSONAPI
 
         Object.const_get(klass)
       rescue NameError
-        fail ::JSONAPI::ResourceNotFound.new("Could not find resource class `#{klass}'")
+        fail ::JsonApi::ResourceNotFound.new("Could not find resource class `#{klass}'")
       end
 
       def self.resource_class(model_name, namespace:, parent:)

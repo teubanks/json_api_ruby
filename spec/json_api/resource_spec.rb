@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe JSONAPI::Resource do
+RSpec.describe JsonApi::Resource do
   subject(:serialized_person) do
     person = Person.new('Brad J. Armbruster', 'ace@airforce.mil')
     PersonResource.new(person).to_hash

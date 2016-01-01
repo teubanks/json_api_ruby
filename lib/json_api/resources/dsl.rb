@@ -1,4 +1,4 @@
-module JSONAPI
+module JsonApi
   module Resources
     module DSL
       attr :_id_field

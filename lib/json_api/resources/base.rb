@@ -1,5 +1,5 @@
 require_relative 'discovery'
-module JSONAPI
+module JsonApi
   module Resources
 
     module Base
@@ -32,7 +32,7 @@ module JSONAPI
       end
 
       def links_hash
-        { 'self' => JSONAPI.configuration.base_url + self_link_path }
+        { 'self' => JsonApi.configuration.base_url + self_link_path }
       end
 
       def self_link_path

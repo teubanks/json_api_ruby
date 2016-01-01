@@ -1,4 +1,4 @@
-module JSONAPI
+module JsonApi
 end
 
 require_relative 'json_api/resource'

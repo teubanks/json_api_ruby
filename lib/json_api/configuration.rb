@@ -1,4 +1,4 @@
-module JSONAPI
+module JsonApi
   class Configuration
     attr_reader :base_url
 

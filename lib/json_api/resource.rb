@@ -2,7 +2,7 @@ require_relative 'resources/base'
 require_relative 'resources/relationships'
 require_relative 'resources/dsl'
 
-module JSONAPI
+module JsonApi
   class Resource
     include Resources::Base
     extend Resources::DSL
@@ -13,7 +13,7 @@ module JSONAPI
 
     # Can be set using `id_field` in the created resource class like so:
     #
-    # class ObjectResource < JSONAPI::Resource
+    # class ObjectResource < JsonApi::Resource
     #   id_field :uuid
     # end
     #
@@ -30,7 +30,7 @@ module JSONAPI
     # Makes the underlying object available to subclasses so we can do things
     # like
     #
-    #   class PersonResource < JSONAPI::Resource
+    #   class PersonResource < JsonApi::Resource
     #     attribute :email
     #     attribute :full_name
     #

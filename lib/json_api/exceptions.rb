@@ -1,3 +1,3 @@
-module JSONAPI
+module JsonApi
   ResourceNotFound = Class.new(StandardError)
 end

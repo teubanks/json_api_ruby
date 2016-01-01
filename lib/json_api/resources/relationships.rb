@@ -1,11 +1,11 @@
-module JSONAPI
+module JsonApi
   module Resources
 
     class Relationships
       # The name of this relationship.
       #   This name comes from the resource object that defines the
       #   relationship. Example:
-      #     class ArticleResource < JSONAPI::Resource
+      #     class ArticleResource < JsonApi::Resource
       #       has_one :author # this is the name of this relationship
       #     end
       attr_reader :name
@@ -13,7 +13,7 @@ module JSONAPI
       # The resource object that "owns" this relationship
       #
       # Example:
-      #   class ArticleResource < JSONAPI::Resource
+      #   class ArticleResource < JsonApi::Resource
       #     has_one :author
       #   end
       #
@@ -43,8 +43,8 @@ module JSONAPI
       def links
         {
           'links' => {
-            'self' => JSONAPI.configuration.base_url + parent.self_link_path + "/relationships/#{name}",
-            'related' => JSONAPI.configuration.base_url + parent.self_link_path + "/#{name}"
+            'self' => JsonApi.configuration.base_url + parent.self_link_path + "/relationships/#{name}",
+            'related' => JsonApi.configuration.base_url + parent.self_link_path + "/#{name}"
           }
         }
       end

@@ -67,7 +67,7 @@ class Person
   end
 end
 
-class PersonResource < JSONAPI::Resource
+class PersonResource < JsonApi::Resource
   attribute :name
   attribute :email_address
   attribute :created_at
@@ -76,7 +76,7 @@ class PersonResource < JSONAPI::Resource
   has_many :articles
 end
 
-class ArticleResource < JSONAPI::Resource
+class ArticleResource < JsonApi::Resource
   id_field :uuid
   attributes :publish_date, :title, :short_description, :created_at, :updated_at
 
@@ -84,7 +84,7 @@ class ArticleResource < JSONAPI::Resource
   has_many :comments
 end
 
-class CommentResource < JSONAPI::Resource
+class CommentResource < JsonApi::Resource
   id_field :uuid
   attribute :author
   attribute :comment_text
@@ -100,15 +100,15 @@ class Three
 end
 
 module Namespace
-  class OneResource < JSONAPI::Resource
+  class OneResource < JsonApi::Resource
   end
 
-  class TwoResource < JSONAPI::Resource
+  class TwoResource < JsonApi::Resource
   end
 end
 
 module DifferentNamespace
-  class ThreeResource < JSONAPI::Resource
+  class ThreeResource < JsonApi::Resource
   end
 end
 

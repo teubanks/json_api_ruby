@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-RSpec.describe JSONAPI::Resources::Relationships do
+RSpec.describe JsonApi::Resources::Relationships do
   let(:article) do
     Article.new('How to raise Triops', 'Triops are hardy little creatures whose eggs can be frozen for as long as 40 years')
   end
