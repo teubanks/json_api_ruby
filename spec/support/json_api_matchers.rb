@@ -30,3 +30,11 @@ RSpec::Matchers.define :be_valid_json_api do
     is_a_hash && has_id_and_type
   end
 end
+
+RSpec::Matchers.define :have_links_for do |expected|
+  match do |actual|
+    relationships = Hash(actual).stringify_keys['relationships']
+    relation = Hash(relationships)[expected]
+    Hash(relation).keys.include?('links')
+  end
+end

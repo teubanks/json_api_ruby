@@ -27,37 +27,52 @@ RSpec.describe JSONAPI::Resource do
   end
 
   describe 'relationships' do
-    subject(:serialized_resource) do
+    subject(:serialized_article) do
       article = Person.new('Anatoly Fyodorovich Krimov', 'red_star@kremlin.mil').articles.first
       ArticleResource.new(article).to_hash(include: [:author, :comments])
     end
 
     context 'with a cardinality of one' do
       it 'includes the relationship keys' do
-        expect(serialized_resource).to have_relationship('author')
+        expect(serialized_article).to have_relationship('author')
       end
 
       it 'have a valid phone relationship' do
-        expect(serialized_resource['relationships']['author']['data']).to be_valid_json_api
+        expect(serialized_article['relationships']['author']['data']).to be_valid_json_api
       end
     end
 
     context 'with a cardinality of many' do
       it 'includes relationship data' do
-        expect(serialized_resource).to have_relationship('comments')
+        expect(serialized_article).to have_relationship('comments')
       end
 
       it 'includes the type for the relationship' do
-        serialized_resource['relationships']['comments']['data'].map do |comment|
+        serialized_article['relationships']['comments']['data'].map do |comment|
           expect(comment).to be_valid_json_api
           expect(comment['type']).to eq 'comments'
         end
       end
 
       it 'includes the id for the relationship' do
-        serialized_resource['relationships']['comments']['data'].map do |comment|
+        serialized_article['relationships']['comments']['data'].map do |comment|
           expect(comment['id'].length).to eq 36
         end
+      end
+    end
+
+    context 'relationship links' do
+      subject(:serialized_article) do
+        article = Person.new('Anatoly Fyodorovich Krimov', 'red_star@kremlin.mil').articles.first
+        ArticleResource.new(article).to_hash
+      end
+
+      it 'includes links to for the comments relationship' do
+        expect(serialized_article).to have_links_for('comments')
+      end
+
+      it 'includes links for the author relationship' do
+        expect(serialized_article).to have_links_for('author')
       end
     end
   end

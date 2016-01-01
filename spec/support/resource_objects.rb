@@ -92,13 +92,13 @@ class CommentResource < JSONAPI::Resource
   attribute :updated_at
 end
 
+# namespaced resources
 class Two
 end
 
 class Three
 end
 
-# namespaced modules
 module Namespace
   class OneResource < JSONAPI::Resource
   end

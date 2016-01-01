@@ -1,13 +1,20 @@
 module JSONAPI
   module Resources
+
     module Relationships
       def relationship_links
+        hash = {}
         self.class.relationships.each do |rel|
-
+          hash[rel[:name].to_s] = {
+            'links' => {
+              'self' => self_link_path + "/relationships/#{rel[:name]}",
+              'related' => ''
+            }
+          }
         end
       end
 
-      def relationship_data
+      def relationship_data(options={})
         hash = {}
         self.class.relationships.each do |rel|
           data = _model.send(rel[:name])
@@ -31,5 +38,6 @@ module JSONAPI
         resource_instance.identifier_hash
       end
     end
+
   end
 end
