@@ -9,7 +9,7 @@ module JSONAPI
 
         self.class.relationships.each do |relationship|
           resource_hash['relationships'] ||= {}
-          resource_hash['relationships'][relationship.name] = relationship.serialize(self)
+          resource_hash['relationships'][relationship.name] = relationship.serialize({parent_resource: self})
         end
 
         resource_hash['links'] = links_hash

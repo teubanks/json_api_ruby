@@ -8,52 +8,43 @@ module JSONAPI
         @name = name.to_s
       end
 
-      def serialize(parent)
-        @parent = parent
-        {}.merge(relationship_links).merge(relationship_data)
+      def serialize(options)
+        @parent = options.fetch(:parent_resource)
+        {}.merge(links).merge(data)
       end
 
-      def relationship_links
+      def links
         {
           'links' => {
-            'self' => parent.self_link_path + "/relationships/#{name}",
-            'related' => ''
+            'self' => JSONAPI.configuration.base_url + parent.self_link_path + "/relationships/#{name}",
+            'related' => JSONAPI.configuration.base_url + parent.self_link_path + "/#{name}"
           }
         }
       end
 
-      def relationship_data(options={})
+      def data(options={})
         data = parent.object.send(name)
 
         if data.kind_of?(Array)
           data = data.map do |d|
-            get_relationship_identity(d)
+            identity(d)
           end
         else
-          data = get_relationship_identity(data)
+          data = identity(data)
         end
 
         { 'data' => data }
       end
 
-      def get_relationship_identity(model, options={})
+      def identity(model, options={})
         resource_class = Discovery.resource_for_name(model, options.merge(parent_resource: parent))
         resource_instance = resource_class.new(model)
         resource_instance.identifier_hash
       end
     end
 
-    class ToOneRelationship < Relationships
-      def cardinality
-        :one
-      end
-    end
-
-    class ToManyRelationship < Relationships
-      def cardinality
-        :many
-      end
-    end
-
+    # convenience classes
+    ToOneRelationship  = Class.new(Relationships)
+    ToManyRelationship = Class.new(Relationships)
   end
 end
