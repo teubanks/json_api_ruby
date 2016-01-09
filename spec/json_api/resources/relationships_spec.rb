@@ -23,7 +23,8 @@ RSpec.describe JsonApi::Resources::Relationships do
 
   describe 'link serialization' do
     subject(:links_object) do
-      author_relation.serialize(parent_resource: article_resource)
+      author_relation.build_resources(parent_resource: article_resource)
+      author_relation.to_hash
     end
 
     it 'includes a links object' do
@@ -53,7 +54,8 @@ RSpec.describe JsonApi::Resources::Relationships do
 
   describe 'data serialization' do
     subject(:serialized_object) do
-      author_relation.serialize(parent_resource: article_resource, included: true)
+      author_relation.build_resources(parent_resource: article_resource, included: true)
+      author_relation.to_hash
     end
 
     it 'has a data top level object' do
@@ -63,7 +65,8 @@ RSpec.describe JsonApi::Resources::Relationships do
     describe 'data object' do
       context 'when an array' do
         subject(:serialized_object) do
-          comments_relation.serialize(parent_resource: article_resource, included: true)
+          comments_relation.build_resources(parent_resource: article_resource, included: true)
+          comments_relation.to_hash
         end
 
         it 'has an identity hash for each object' do
@@ -81,7 +84,8 @@ RSpec.describe JsonApi::Resources::Relationships do
 
   describe 'identity hash' do
     it 'returns an identity hash given a model and parent resource' do
-      serialized_object = author_relation.serialize(parent_resource: article_resource, included: true)
+      author_relation.build_resources(parent_resource: article_resource, included: true)
+      serialized_object = author_relation.to_hash
       expect(serialized_object['data'].keys).to eq ['id', 'type']
     end
   end
@@ -89,14 +93,16 @@ RSpec.describe JsonApi::Resources::Relationships do
   describe 'relationship serialization' do
     context 'when the option "include" is true' do
       it 'includes the data object' do
-        serialized_data = author_relation.serialize(parent_resource: article_resource, included: true)
+        author_relation.build_resources(parent_resource: article_resource, included: true)
+        serialized_data = author_relation.to_hash
         expect(serialized_data).to include('data')
       end
     end
 
     context 'when the option "include" is falsey' do
       it 'does not include data object' do
-        serialized_data = author_relation.serialize(parent_resource: article_resource)
+        author_relation.build_resources(parent_resource: article_resource)
+        serialized_data = author_relation.to_hash
         expect(serialized_data).to_not include('data')
       end
     end

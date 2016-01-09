@@ -3,17 +3,16 @@ module JsonApi
   module Resources
 
     module Base
+      attr_reader :relationships
       def to_hash(options={})
         options.symbolize_keys
 
         resource_hash = identifier_hash
         resource_hash['attributes'] = attributes_hash
-        included_objects = parse_for_includes(options[:include])
 
-        self.class.relationships.each do |relationship|
-          included = included_objects.include?(relationship.name)
+        relationships.each do |relationship|
           resource_hash['relationships'] ||= {}
-          resource_hash['relationships'][relationship.name] = relationship.serialize({parent_resource: self, included: included})
+          resource_hash['relationships'][relationship.name] = relationship.to_hash
         end
 
         resource_hash['links'] = links_hash
@@ -45,6 +44,16 @@ module JsonApi
           attrs[attr.to_s] = send(attr)
         end
         attrs
+      end
+
+      # Builds relationship resource classes
+      def build_object_graph
+        @relationships ||= []
+        Array(self.class.relationships).each do |relationship|
+          included = includes.include?(relationship.name)
+          relationship.build_resources({parent_resource: self, included: included})
+          @relationships << relationship
+        end
       end
     end
 

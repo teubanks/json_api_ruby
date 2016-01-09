@@ -7,6 +7,20 @@ RSpec::Matchers.define :have_relationship do |expected|
   end
 end
 
+RSpec::Matchers.define :have_data do
+  match do |actual|
+    data = Hash(actual).stringify_keys['data']
+    data.present?
+  end
+end
+
+RSpec::Matchers.define :have_meta do
+  match do |actual|
+    data = Hash(actual).stringify_keys['meta']
+    data.present?
+  end
+end
+
 RSpec::Matchers.define :have_attribute do |key_name|
   match do |actual|
     attributes = Hash(actual).stringify_keys['attributes']

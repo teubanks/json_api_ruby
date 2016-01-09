@@ -29,7 +29,7 @@ RSpec.describe JsonApi::Resource do
   describe 'relationships' do
     subject(:serialized_article) do
       article = Person.new('Anatoly Fyodorovich Krimov', 'red_star@kremlin.mil').articles.first
-      ArticleResource.new(article).to_hash(include: [:author, :comments])
+      ArticleResource.new(article, include: [:author, :comments]).to_hash
     end
 
     context 'with a cardinality of one' do
@@ -37,7 +37,7 @@ RSpec.describe JsonApi::Resource do
         expect(serialized_article).to have_relationship('author')
       end
 
-      it 'have a valid phone relationship' do
+      it 'have a valid author relationship' do
         expect(serialized_article['relationships']['author']['data']).to be_valid_json_api
       end
     end

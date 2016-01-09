@@ -44,8 +44,12 @@ module JsonApi
 
     attr_accessor :_model
 
+    attr_reader :includes
+
     def initialize(model, options={})
       @_model = model
+      @includes = options.fetch(:include, []).map(&:to_s)
+      build_object_graph # base module method
     end
   end
 end

@@ -24,16 +24,26 @@ module JsonApi
       # included
       attr_reader :included
 
+      # The resource object that represents this relationship
+      attr_reader :resource
+
+      attr_reader :parent_model
+
       def initialize(name, options)
         @name = name.to_s
+        @resources = []
       end
 
-      def serialize(options)
-        @parent = options.fetch(:parent_resource)
-        @included = options.fetch(:included, false)
+      def to_hash
         return_hash = links
         return_hash.merge!(data) if included?
         return_hash
+      end
+
+      def build_resources(options)
+        @parent = options.fetch(:parent_resource)
+        @parent_model = parent._model
+        @included = options.fetch(:included, false)
       end
 
       def included?
@@ -48,30 +58,47 @@ module JsonApi
           }
         }
       end
-
-      def data(options={})
-        data = parent.object.send(name)
-
-        if data.kind_of?(Array)
-          data = data.map do |d|
-            identity(d)
-          end
-        else
-          data = identity(data)
-        end
-
-        { 'data' => data }
-      end
-
-      def identity(model, options={})
-        resource_class = Discovery.resource_for_name(model, options.merge(parent_resource: parent))
-        resource_instance = resource_class.new(model)
-        resource_instance.identifier_hash
-      end
     end
 
     # convenience classes
-    ToOneRelationship  = Class.new(Relationships)
-    ToManyRelationship = Class.new(Relationships)
+    class ToOneRelationship < Relationships
+      def data(options={})
+        {'data' => resource_object.identifier_hash}
+      end
+
+      def build_resources(options)
+        super
+        return unless included?
+        resource_model = parent_model.send(name)
+        resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
+        @resources << resource_class.new(resource_model)
+      end
+
+      def resource_object
+        @resources.first
+      end
+    end
+
+    class ToManyRelationship < Relationships
+      def data(options={})
+        data = resource_objects.map do |object|
+          object.identifier_hash
+        end
+        {'data' => data}
+      end
+
+      def build_resources(options)
+        super
+        return unless included?
+        parent_model.send(name).each do |resource_model|
+          resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
+          @resources << resource_class.new(resource_model)
+        end
+      end
+
+      def resource_objects
+        @resources
+      end
+    end
   end
 end

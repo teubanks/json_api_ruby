@@ -6,7 +6,10 @@ module JsonApi
         klass = options.fetch(:resource_class, nil)
         parent = options.fetch(:parent_resource, nil)
 
-        klass = resource_class(model.class.to_s.underscore, namespace: namespace, parent: parent) if klass.blank?
+        if klass.blank?
+          # discover it
+          klass = resource_class(model.class.to_s.underscore, namespace: namespace, parent: parent)
+        end
 
         Object.const_get(klass)
       rescue NameError

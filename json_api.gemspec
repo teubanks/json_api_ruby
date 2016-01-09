@@ -5,7 +5,7 @@ require 'json_api/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "json_api"
-  spec.version       = JSONAPI::VERSION
+  spec.version       = JsonApi::VERSION
   spec.authors       = ["Tracey Eubanks"]
   spec.email         = ["tracey@bypassmobile.com"]
   spec.description   = %q{Create JSON API resources when you don't have Rails 4+ available}
@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency "rspec", "~> 3"
   spec.add_development_dependency "rspec-its"
   spec.add_development_dependency "pry-byebug"
+  spec.add_development_dependency "guard-rspec"
 end
