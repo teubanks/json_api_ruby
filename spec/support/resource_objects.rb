@@ -63,7 +63,7 @@ class Person
   end
 
   def articles
-    [ Article.new("How to Conquer the World", "10 simple steps to world domination", self) ]
+    @articles ||= [ Article.new("How to Conquer the World", "10 simple steps to world domination", self) ]
   end
 end
 

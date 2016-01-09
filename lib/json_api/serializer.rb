@@ -31,11 +31,11 @@ module JsonApi
 
   class Serializer
     def initialize(object, options)
-      @meta = options.fetch('meta', Hash.new).stringify_keys
-      @object   = object
-      @includes = options.fetch('include', [])
+      @meta         = options.fetch('meta', Hash.new).stringify_keys
+      @object       = object
+      @includes     = options.fetch('include', [])
       resource_name = "#{@object.class.to_s.underscore}_resource".classify
-      @klass_name = options.fetch('class_name', resource_name)
+      @klass_name   = options.fetch('class_name', resource_name)
     end
 
     def to_hash
@@ -44,49 +44,66 @@ module JsonApi
       serialized     = { 'data' => resource.to_hash }
       relationships  = resource.relationships
       included_data  = assemble_included_data(relationships)
-      binding.pry
-      serialized['included'] = included_data
+
+      if included_data.present?
+        included_data.uniq! do |inc_data|
+          inc_data['id'] + inc_data['type']
+        end
+        serialized['included'] = included_data
+      end
+
       serialized['meta'] = @meta if @meta.present?
       serialized
     end
 
     def assemble_included_data(relationships)
       relationships.flat_map do |relationship|
-        relationship.resources.map(&:to_hash) if relationship.resources.present?
+        next if relationship.resources.blank?
+        relationship.resources.map(&:to_hash)
       end.compact
     end
   end
 
-  class CollectionSerializer < Serializer
-    def initialize(object, options = {})
-      super
-      @meta = options.fetch :meta, nil
-      @klass_name = options.fetch(:class_name, @object.first.class)
+  class CollectionSerializer
+    def initialize(objects, options = {})
+      @meta     = options.fetch('meta', Hash.new).stringify_keys
+      @objects  = objects
+      @includes = options.fetch('include', [])
+      @klass_name   = options.fetch('class_name', nil)
     end
 
     def to_hash
-      return {data: []} if @object.empty?
+      serialized = {}
+      included_data = []
 
-      resource_klass = JsonApi.resolve_resource_name @klass_name
-      serialized     = { :data => [] }
-      relationships  = resource_klass.relationships
-      @object.each_with_index do |model, index|
-        resource = resource_klass.new model
-        serialized[:data] << resource.to_hash
-        included_data = assemble_included_data model, serialized[:data][index],
-          relationships
-        included_data.each_value do |data|
-          serialized[:included] ||= []
-          Array.wrap(data).each do |new_data|
-            next if serialized[:included].include? new_data
-            serialized[:included] << new_data
-          end
-        end
+      data_array = @objects.map do |object|
+        resource_name = "#{object.class.to_s.underscore}_resource".classify
+        klass_name   = @klass_name || resource_name
+        resource_klass = Resources::Discovery.resource_for_name(object, resource_class: klass_name)
+        resource = resource_klass.new(object, include: @includes)
+        included_data += assemble_included_data(resource.relationships)
+        resource.to_hash
       end
 
-      serialized[:meta] = @meta if @meta
+      serialized['data'] = data_array
+
+      serialized['meta'] = @meta if @meta
+
+      if included_data.present?
+        included_data.uniq! do |inc_data|
+          inc_data['id'] + inc_data['type']
+        end
+        serialized['included'] = included_data
+      end
 
       serialized
+    end
+
+    def assemble_included_data(relationships)
+      relationships.flat_map do |relationship|
+        next if relationship.resources.blank?
+        relationship.resources.map(&:to_hash)
+      end.compact
     end
   end
 end

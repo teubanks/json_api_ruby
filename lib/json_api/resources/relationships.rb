@@ -64,7 +64,7 @@ module JsonApi
     class ToOneRelationship < Relationships
       def data(options={})
         identifier_hash = resource_object.identifier_hash if resource_object
-        {'data' => Hash.new(identifier_hash)}
+        {'data' => Hash(identifier_hash)}
       end
 
       def build_resources(options)
