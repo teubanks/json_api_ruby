@@ -25,7 +25,7 @@ module JsonApi
       attr_reader :included
 
       # The resource object that represents this relationship
-      attr_reader :resource
+      attr_reader :resources
 
       attr_reader :parent_model
 
@@ -63,7 +63,8 @@ module JsonApi
     # convenience classes
     class ToOneRelationship < Relationships
       def data(options={})
-        {'data' => resource_object.identifier_hash}
+        identifier_hash = resource_object.identifier_hash if resource_object
+        {'data' => Hash.new(identifier_hash)}
       end
 
       def build_resources(options)

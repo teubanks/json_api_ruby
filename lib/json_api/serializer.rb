@@ -40,28 +40,20 @@ module JsonApi
 
     def to_hash
       resource_klass = Resources::Discovery.resource_for_name(@object, resource_class: @klass_name)
-      resource       = resource_klass.new(@object)
-      serialized     = { 'data' => resource.to_hash(include: @includes) }
-      relationships  = serialized['data'].fetch('relationships', Array.new)
-      included_data  = assemble_included_data(@object, resource, relationships)
-      serialized['included'] = included_data.values.flatten
+      resource       = resource_klass.new(@object, include: @includes)
+      serialized     = { 'data' => resource.to_hash }
+      relationships  = resource.relationships
+      included_data  = assemble_included_data(relationships)
+      binding.pry
+      serialized['included'] = included_data
       serialized['meta'] = @meta if @meta.present?
       serialized
     end
 
-    def assemble_included_data(model, resource, relationships)
-      relationships.each_with_object({}) do |(relationship_name, _), hsh|
-        hsh[relationship_name] ||= []
-
-        # next if resource['relationships'].blank?
-        # next unless @included.include? relationship_name
-        #
-        # if !model.respond_to?(relationship_name)
-        #   raise InvalidRelationshipError.new("Relationship `#{relationship_name}' not found on class `#{model.class.to_s}'")
-        # end
-
-        Array(resource['relationships'][relationship_name]['data']).map {|rd| rd['id']}
-      end
+    def assemble_included_data(relationships)
+      relationships.flat_map do |relationship|
+        relationship.resources.map(&:to_hash) if relationship.resources.present?
+      end.compact
     end
   end
 

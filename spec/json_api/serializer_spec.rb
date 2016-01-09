@@ -20,6 +20,7 @@ RSpec.describe JsonApi::Serializer do
   context 'with included resources' do
     it 'has a top level included object' do
       serialized = JsonApi.serialize(person, meta: { meta_key: 'meta value' }, include: [:articles])
+      binding.pry
       expect(serialized['included']).to be_present
     end
 
