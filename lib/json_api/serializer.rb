@@ -1,27 +1,17 @@
-# module JsonApi
-#   class Serializer
-#
-#   end
-# end
-
-# Path for inclusion of data using the dot method
-# Zip through the relationship data and simply serialized the whole object.
-# Keep a reference to already included data so we don't re-include or re-query
-# for it (possibly future thing?)
 module JsonApi
   extend self
 
   def serialize_errors(*errors)
-    resource_klass = resolve_resource_name('ErrorResource')
     resource_hashes = errors.flatten.map do |error|
-      resource_klass.new(error).to_hash
+      ErrorResource.new(error).to_hash
     end
     { errors: resource_hashes }
   end
 
   def serialize(object, options = {})
     options.stringify_keys!
-    if object.is_a? Array
+    # assume it's a collection
+    if object.present? && object.respond_to?(:to_a)
       serializer = CollectionSerializer.new(object, options)
     else
       serializer = Serializer.new(object, options)

@@ -71,6 +71,7 @@ module JsonApi
         super
         return unless included?
         resource_model = parent_model.send(name)
+        return if resource_model.blank?
         resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
         @resources << resource_class.new(resource_model)
       end

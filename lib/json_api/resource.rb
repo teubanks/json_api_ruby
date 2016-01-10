@@ -19,7 +19,7 @@ module JsonApi
     #
     # defaults to :id
     def id
-      object.public_send(self.class._id_field)
+      object.public_send(self.class._id_field).to_s
     end
 
     # Can be overridden in a subclass
