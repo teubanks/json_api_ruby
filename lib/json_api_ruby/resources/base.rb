@@ -51,8 +51,8 @@ module JsonApi
         @relationships ||= []
         Array(self.class.relationships).each do |relationship|
           included = includes.include?(relationship.name)
-          relationship.build_resources({parent_resource: self, included: included})
-          @relationships << relationship
+          rel = relationship.build_resources({parent_resource: self, included: included})
+          @relationships << rel
         end
       end
     end

@@ -32,11 +32,7 @@ module JsonApi
       private
       def add_relationship(object_name, cardinality, options)
         @relationships ||= []
-        if cardinality == :one
-          @relationships << ToOneRelationship.new(object_name, options)
-        else
-          @relationships << ToManyRelationship.new(object_name, options)
-        end
+        @relationships << RelationshipMeta.new(object_name, options.merge(cardinality: cardinality))
         create_accessor_methods(object_name)
       end
 

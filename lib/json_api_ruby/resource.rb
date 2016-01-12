@@ -47,8 +47,9 @@ module JsonApi
     attr_reader :includes
 
     def initialize(model, options={})
+      options.stringify_keys!
       @_model = model
-      @includes = options.fetch(:include, []).map(&:to_s)
+      @includes = Array.wrap(options.fetch('include', [])).map(&:to_s)
       build_object_graph # base module method
     end
   end

@@ -1,7 +1,7 @@
 module JsonApi
   module Resources
 
-    class Relationships
+    class RelationshipMeta
       # The name of this relationship.
       #   This name comes from the resource object that defines the
       #   relationship. Example:
@@ -10,6 +10,25 @@ module JsonApi
       #     end
       attr_reader :name
 
+      attr_reader :cardinality
+
+      def initialize(name, options)
+        @name = name.to_s
+        @cardinality = options.fetch(:cardinality)
+      end
+
+      def build_resources(options)
+        if cardinality == :one
+          relationship = ToOneRelationship.new(name, options)
+        else
+          relationship = ToManyRelationship.new(name, options)
+        end
+        relationship.build_resources(options)
+        relationship
+      end
+    end
+
+    class Relationship
       # The resource object that "owns" this relationship
       #
       # Example:
@@ -19,28 +38,19 @@ module JsonApi
       #
       # `ArticleResource` is the parent of the author object
       attr_reader :parent
+      attr_reader :parent_model
 
       # Determines whether the `data` attribute should be filled out and
       # included
       attr_reader :included
+      attr_reader :name
 
       # The resource object that represents this relationship
       attr_reader :resources
 
-      attr_reader :parent_model
-
       def initialize(name, options)
-        @name = name.to_s
+        @name = name
         @resources = []
-      end
-
-      def to_hash
-        return_hash = links
-        return_hash.merge!(data) if included?
-        return_hash
-      end
-
-      def build_resources(options)
         @parent = options.fetch(:parent_resource)
         @parent_model = parent._model
         @included = options.fetch(:included, false)
@@ -48,6 +58,12 @@ module JsonApi
 
       def included?
         included == true
+      end
+
+      def to_hash
+        return_hash = links
+        return_hash.merge!(data) if included?
+        return_hash
       end
 
       def links
@@ -61,17 +77,17 @@ module JsonApi
     end
 
     # convenience classes
-    class ToOneRelationship < Relationships
+    class ToOneRelationship < Relationship
       def data(options={})
         identifier_hash = resource_object.identifier_hash if resource_object
-        {'data' => Hash(identifier_hash)}
+        {'data' => identifier_hash}
       end
 
       def build_resources(options)
-        super
         return unless included?
         resource_model = parent_model.send(name)
         return if resource_model.blank?
+
         resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
         @resources << resource_class.new(resource_model)
       end
@@ -81,7 +97,7 @@ module JsonApi
       end
     end
 
-    class ToManyRelationship < Relationships
+    class ToManyRelationship < Relationship
       def data(options={})
         data = resource_objects.map do |object|
           object.identifier_hash
@@ -90,8 +106,8 @@ module JsonApi
       end
 
       def build_resources(options)
-        super
         return unless included?
+
         parent_model.send(name).each do |resource_model|
           resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
           @resources << resource_class.new(resource_model)
