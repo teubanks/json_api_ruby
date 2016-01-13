@@ -8,7 +8,7 @@ module JsonApi
         options.symbolize_keys
 
         resource_hash = identifier_hash
-        resource_hash['attributes'] = attributes_hash
+        resource_hash['attributes'] = attributes_hash if attributes_hash.any?
 
         relationships.each do |relationship|
           resource_hash['relationships'] ||= {}
@@ -40,7 +40,7 @@ module JsonApi
 
       def attributes_hash
         attrs = {}
-        self.class.fields.each do |attr|
+        Array(self.class.fields).each do |attr|
           attrs[attr.to_s] = send(attr)
         end
         attrs

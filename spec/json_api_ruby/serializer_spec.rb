@@ -10,12 +10,22 @@ RSpec.describe JsonApi::Serializer do
       JsonApi.serialize(person, meta: { meta_key: 'meta value' })
     end
 
+    subject(:serialized_data_other_resource_class) do
+      JsonApi.serialize(person, resource_class: 'Namespace::OneResource')
+    end
+
     it 'has a top level data object' do
       expect(serialized_data).to have_data
     end
 
     it 'passes meta through' do
       expect(serialized_data).to have_meta
+    end
+
+    it 'serializes the data using the passed-in resource class' do
+      expected_keys = %w(id type links)
+      expect(serialized_data_other_resource_class['data']).to be_valid_json_api
+      expect(serialized_data_other_resource_class['data'].keys).to eql(expected_keys)
     end
 
     context 'with included resources' do
@@ -42,6 +52,18 @@ RSpec.describe JsonApi::Serializer do
         Person.new('Sabastian Bludd', 'sbludd@cobra.mil'),
         Person.new('John Zullo', 'ace@specops.mil')
       ]
+    end
+
+    subject(:serialized_collection_other_resource_class) do
+      JsonApi.serialize(people, resource_class: 'Namespace::OneResource')
+    end
+
+    it 'serializes the data using the passed-in resource class' do
+      serialized_collection_other_resource_class['data'].each do |serialized|
+        expected_keys = %w(id type links)
+        expect(serialized).to be_valid_json_api
+        expect(serialized.keys).to eql(expected_keys)
+      end
     end
 
     context 'without included resources' do
