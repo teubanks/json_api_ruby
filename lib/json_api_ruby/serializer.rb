@@ -21,15 +21,15 @@ module JsonApi
 
   class Serializer
     def initialize(object, options)
-      @meta         = options.fetch('meta', Hash.new).stringify_keys
-      @object       = object
-      @includes     = options.fetch('include', [])
-      resource_name = "#{@object.class.to_s.underscore}_resource".classify
-      @klass_name   = options.fetch('class_name', resource_name)
+      @meta           = options.fetch('meta', Hash.new).stringify_keys
+      @object         = object
+      @includes       = options.fetch('include', [])
+      resource_name   = "#{@object.class.to_s.underscore}_resource".classify
+      @resource_class = options.fetch('resource_class', resource_name)
     end
 
     def to_hash
-      resource_klass = Resources::Discovery.resource_for_name(@object, resource_class: @klass_name)
+      resource_klass = Resources::Discovery.resource_for_name(@object, resource_class: @resource_class)
       resource       = resource_klass.new(@object, include: @includes)
       serialized     = { 'data' => resource.to_hash }
       relationships  = resource.relationships
@@ -56,10 +56,10 @@ module JsonApi
 
   class CollectionSerializer
     def initialize(objects, options = {})
-      @meta     = options.fetch('meta', Hash.new).stringify_keys
-      @objects  = objects
-      @includes = options.fetch('include', [])
-      @klass_name   = options.fetch('class_name', nil)
+      @meta           = options.fetch('meta', Hash.new).stringify_keys
+      @objects        = objects
+      @includes       = options.fetch('include', [])
+      @resource_class = options.fetch('resource_class', nil)
     end
 
     def to_hash
@@ -67,10 +67,10 @@ module JsonApi
       included_data = []
 
       data_array = @objects.map do |object|
-        resource_name = "#{object.class.to_s.underscore}_resource".classify
-        klass_name   = @klass_name || resource_name
+        resource_name  = "#{object.class.to_s.underscore}_resource".classify
+        klass_name     = @resource_class || resource_name
         resource_klass = Resources::Discovery.resource_for_name(object, resource_class: klass_name)
-        resource = resource_klass.new(object, include: @includes)
+        resource       = resource_klass.new(object, include: @includes)
         included_data += assemble_included_data(resource.relationships)
         resource.to_hash
       end
@@ -97,4 +97,3 @@ module JsonApi
     end
   end
 end
-
