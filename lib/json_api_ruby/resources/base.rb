@@ -4,9 +4,7 @@ module JsonApi
 
     module Base
       attr_reader :relationships
-      def to_hash(options={})
-        options.symbolize_keys
-
+      def to_hash
         resource_hash = identifier_hash
         resource_hash['attributes'] = attributes_hash if attributes_hash.any?
 
@@ -23,7 +21,7 @@ module JsonApi
       # "article.comments" and "article-comments", so, leaving the method here
       # but only supporting the most basic of things
       def parse_for_includes(includes)
-        Array(includes).map {|inc| inc.to_s }
+        Array(includes).map(&:to_s)
       end
 
       def identifier_hash
@@ -39,11 +37,11 @@ module JsonApi
       end
 
       def attributes_hash
-        attrs = {}
-        Array(self.class.fields).each do |attr|
-          attrs[attr.to_s] = send(attr)
+        Array(self.class.fields).inject({}) do |attrs, attr|
+          meth = method(attr)
+          attrs[attr.to_s] = meth.call
+          attrs
         end
-        attrs
       end
 
       # Builds relationship resource classes

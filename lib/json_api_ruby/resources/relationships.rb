@@ -3,11 +3,13 @@ module JsonApi
 
     class RelationshipMeta
       # The name of this relationship.
-      #   This name comes from the resource object that defines the
-      #   relationship. Example:
-      #     class ArticleResource < JsonApi::Resource
-      #       has_one :author # this is the name of this relationship
-      #     end
+      #
+      # This name comes from the resource object that defines the
+      # relationship. Example:
+      #
+      #   class ArticleResource < JsonApi::Resource
+      #     has_one :author # this is the name of this relationship
+      #   end
       attr_reader :name
 
       attr_reader :cardinality
@@ -105,6 +107,7 @@ module JsonApi
         {'data' => data}
       end
 
+      # Build the related resources
       def build_resources(options)
         return unless included?
 

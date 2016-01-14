@@ -64,36 +64,32 @@ module JsonApi
 
     def to_hash
       serialized = {}
-      included_data = []
+      included_resources = []
 
       data_array = @objects.map do |object|
         resource_name  = "#{object.class.to_s.underscore}_resource".classify
         klass_name     = @resource_class || resource_name
         resource_klass = Resources::Discovery.resource_for_name(object, resource_class: klass_name)
         resource       = resource_klass.new(object, include: @includes)
-        included_data += assemble_included_data(resource.relationships)
+        included_resources += resource.relationships.select {|rel| rel.included?}.flat_map {|rel| rel.resources }
+
         resource.to_hash
+      end
+
+      included_resources.uniq! do |rel|
+        rel.id + rel.type
       end
 
       serialized['data'] = data_array
 
       serialized['meta'] = @meta if @meta
-
-      if included_data.present?
-        included_data.uniq! do |inc_data|
-          inc_data['id'] + inc_data['type']
-        end
-        serialized['included'] = included_data
-      end
+      serialized['included'] = assemble_included_data(included_resources)
 
       serialized
     end
 
-    def assemble_included_data(relationships)
-      relationships.flat_map do |relationship|
-        next if relationship.resources.blank?
-        relationship.resources.map(&:to_hash)
-      end.compact
+    def assemble_included_data(included_resources)
+      included_resources.map(&:to_hash)
     end
   end
 end

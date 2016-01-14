@@ -8,8 +8,8 @@ Gem::Specification.new do |spec|
   spec.version       = JsonApi::VERSION
   spec.authors       = ["Tracey Eubanks"]
   spec.email         = ["tracey@bypassmobile.com"]
-  spec.description   = %q{Create JSON API resources when you don't have Rails 4+ available}
-  spec.summary       = %q{Create JSON API resources when you don't have Rails 4+ available}
+  spec.description   = %q{Extremely lightweight implementation of JSON API}
+  spec.summary       = %q{Extremely lightweight implementation of JSON API}
   spec.homepage      = "https://github.com/teubanks/jsonapi_ruby"
   spec.license       = "Free For All"
 

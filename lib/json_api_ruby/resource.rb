@@ -13,9 +13,9 @@ module JsonApi
 
     # Can be set using `id_field` in the created resource class like so:
     #
-    # class ObjectResource < JsonApi::Resource
-    #   id_field :uuid
-    # end
+    #   class ObjectResource < JsonApi::Resource
+    #     id_field :uuid
+    #   end
     #
     # defaults to :id
     def id
@@ -42,8 +42,12 @@ module JsonApi
       _model
     end
 
+    # The model that is used to fill out the data and attributes objects
     attr_accessor :_model
 
+    # Includes can be passed in from a request
+    # See:
+    #   http://jsonapi.org/format/#fetching-includes
     attr_reader :includes
 
     def initialize(model, options={})
