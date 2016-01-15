@@ -13,13 +13,18 @@ module JsonApi
       attr_reader :name
 
       attr_reader :cardinality
+      attr_reader :init_options
+      attr_reader :resource_class_name
 
       def initialize(name, options)
         @name = name.to_s
         @cardinality = options.fetch(:cardinality)
+        @init_options = options
+        @resource_class_name = options.fetch(:resource_class, nil)
       end
 
       def build_resources(options)
+        options.merge!(resource_class:resource_class_name)
         if cardinality == :one
           relationship = ToOneRelationship.new(name, options)
         else
@@ -50,12 +55,17 @@ module JsonApi
       # The resource object that represents this relationship
       attr_reader :resources
 
+      attr_reader :init_options
+      attr_reader :resource_class_name
+
       def initialize(name, options)
         @name = name
         @resources = []
         @parent = options.fetch(:parent_resource)
         @parent_model = parent._model
         @included = options.fetch(:included, false)
+        @init_options = options
+        @resource_class_name = options.fetch(:resource_class, nil)
       end
 
       def included?
@@ -70,10 +80,10 @@ module JsonApi
 
       def links
         {
-          'links' => {
-            'self' => JsonApi.configuration.base_url + parent.self_link_path + "/relationships/#{name}",
-            'related' => JsonApi.configuration.base_url + parent.self_link_path + "/#{name}"
-          }
+            'links' => {
+                'self' => JsonApi.configuration.base_url + parent.self_link_path + "/relationships/#{name}",
+                'related' => JsonApi.configuration.base_url + parent.self_link_path + "/#{name}"
+            }
         }
       end
     end
@@ -90,7 +100,7 @@ module JsonApi
         resource_model = parent_model.send(name)
         return if resource_model.blank?
 
-        resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
+        resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent, resource_class:resource_class_name))
         @resources << resource_class.new(resource_model)
       end
 
@@ -112,7 +122,7 @@ module JsonApi
         return unless included?
 
         parent_model.send(name).each do |resource_model|
-          resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
+          resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent, resource_class:resource_class_name))
           @resources << resource_class.new(resource_model)
         end
       end
