@@ -14,6 +14,10 @@ RSpec.describe JsonApi::Serializer do
       JsonApi.serialize(person, resource_class: 'Namespace::OneResource')
     end
 
+    it 'returns a nil data object for no objects' do
+      expect(JsonApi.serialize(nil)).to eq({'data' => nil})
+    end
+
     it 'has a top level data object' do
       expect(serialized_data).to have_data
     end
@@ -56,6 +60,10 @@ RSpec.describe JsonApi::Serializer do
 
     subject(:serialized_collection_other_resource_class) do
       JsonApi.serialize(people, resource_class: 'Namespace::OneResource')
+    end
+
+    it 'returns an empty data array for no objects' do
+      expect(JsonApi.serialize([])).to eq({'data' => []})
     end
 
     it 'serializes the data using the passed-in resource class' do

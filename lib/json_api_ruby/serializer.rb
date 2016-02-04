@@ -11,7 +11,7 @@ module JsonApi
   def serialize(object, options = {})
     options.stringify_keys!
     # assume it's a collection
-    if object.present? && object.respond_to?(:to_a)
+    if !object.nil? && object.respond_to?(:to_a)
       serializer = CollectionSerializer.new(object, options)
     else
       serializer = Serializer.new(object, options)
@@ -29,17 +29,21 @@ module JsonApi
     end
 
     def to_hash
-      resource_klass = Resources::Discovery.resource_for_name(@object, resource_class: @resource_class)
-      resource       = resource_klass.new(@object, include: @includes)
-      serialized     = { 'data' => resource.to_hash }
-      relationships  = resource.relationships
-      included_data  = assemble_included_data(relationships)
+      if @object.nil?
+        serialized = { 'data' => nil }
+      else
+        resource_klass = Resources::Discovery.resource_for_name(@object, resource_class: @resource_class)
+        resource       = resource_klass.new(@object, include: @includes)
+        serialized     = { 'data' => resource.to_hash }
+        relationships  = resource.relationships
+        included_data  = assemble_included_data(relationships)
 
-      if included_data.present?
-        included_data.uniq! do |inc_data|
-          inc_data['id'] + inc_data['type']
+        if included_data.present?
+          included_data.uniq! do |inc_data|
+            inc_data['id'] + inc_data['type']
+          end
+          serialized['included'] = included_data
         end
-        serialized['included'] = included_data
       end
 
       serialized['meta'] = @meta if @meta.present?
@@ -82,8 +86,8 @@ module JsonApi
 
       serialized['data'] = data_array
 
-      serialized['meta'] = @meta if @meta
-      serialized['included'] = assemble_included_data(included_resources)
+      serialized['meta'] = @meta if @meta.present?
+      serialized['included'] = assemble_included_data(included_resources) if included_resources.present?
 
       serialized
     end
