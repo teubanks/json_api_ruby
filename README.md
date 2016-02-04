@@ -6,4 +6,3 @@ See the <a href="https://github.com/teubanks/jsonapi_ruby/wiki">Wiki</a> page or
 
 ### Status
 Definitely a work in progress.
-This is currently an Alpha release, use at your own peril
