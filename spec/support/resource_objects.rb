@@ -84,6 +84,22 @@ class ArticleResource < JsonApi::Resource
   has_many :comments
 end
 
+class SimplePersonResource < JsonApi::Resource
+  attribute :name
+end
+
+class SimpleCommentResource < JsonApi::Resource
+  id_field :uuid
+  attribute :comment_text
+end
+
+class SimpleArticleResource < JsonApi::Resource
+  attribute :title
+
+  has_one :author, resource_class: SimplePersonResource
+  has_many :comments, resource_class: 'SimpleCommentResource'
+end
+
 class CommentResource < JsonApi::Resource
   id_field :uuid
   attribute :author

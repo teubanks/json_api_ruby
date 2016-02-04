@@ -3,8 +3,12 @@ module JsonApi
     class Discovery
       def self.resource_for_name(model, options={})
         @discovered_classes ||= {}
-        namespace = options.fetch(:namespace, nil)
         klass = options.fetch(:resource_class, nil)
+
+        # Duck typing. If klass responds to :new, we assume it's a class
+        return klass if klass.respond_to?(:new)
+
+        namespace = options.fetch(:namespace, nil)
         parent = options.fetch(:parent_resource, nil)
 
         if klass.blank?

@@ -107,4 +107,32 @@ RSpec.describe JsonApi::Resources::RelationshipMeta do
       end
     end
   end
+
+  describe 'passing in a resource class' do
+    let(:simple_article_resource) do
+      SimpleArticleResource.new(article, include: ['author', 'comments'])
+    end
+
+    let(:author_relation) do
+      simple_article_resource.relationships.find do |rel|
+        rel.name == 'author'
+      end
+    end
+
+    let(:comment_relation) do
+      simple_article_resource.relationships.find do |rel|
+        rel.name == 'comments'
+      end
+    end
+
+    it 'uses the passed in resource_class for author' do
+      expect(author_relation.resource_object).to be_an_instance_of(SimplePersonResource)
+    end
+
+    it 'uses the passed in resource_class for each comment' do
+      comment_relation.resource_objects.each do |resource_object|
+        expect(resource_object).to be_an_instance_of(SimpleCommentResource)
+      end
+    end
+  end
 end

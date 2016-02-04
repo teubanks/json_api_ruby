@@ -14,16 +14,19 @@ module JsonApi
 
       attr_reader :cardinality
 
+      attr_reader :explicit_resource_class
+
       def initialize(name, options)
         @name = name.to_s
         @cardinality = options.fetch(:cardinality)
+        @explicit_resource_class = options.fetch(:resource_class, nil)
       end
 
       def build_resources(options)
         if cardinality == :one
-          relationship = ToOneRelationship.new(name, options)
+          relationship = ToOneRelationship.new(name, options.merge(explicit_resource_class: explicit_resource_class))
         else
-          relationship = ToManyRelationship.new(name, options)
+          relationship = ToManyRelationship.new(name, options.merge(explicit_resource_class: explicit_resource_class))
         end
         relationship.build_resources(options)
         relationship
@@ -46,6 +49,8 @@ module JsonApi
       # included
       attr_reader :included
       attr_reader :name
+      attr_reader :explicit_resource_class
+
 
       # The resource object that represents this relationship
       attr_reader :resources
@@ -56,6 +61,7 @@ module JsonApi
         @parent = options.fetch(:parent_resource)
         @parent_model = parent._model
         @included = options.fetch(:included, false)
+        @explicit_resource_class = options.fetch(:explicit_resource_class)
       end
 
       def included?
@@ -90,7 +96,7 @@ module JsonApi
         resource_model = parent_model.send(name)
         return if resource_model.blank?
 
-        resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
+        resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent, resource_class: explicit_resource_class))
         @resources << resource_class.new(resource_model)
       end
 
@@ -112,7 +118,7 @@ module JsonApi
         return unless included?
 
         parent_model.send(name).each do |resource_model|
-          resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent))
+          resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent, resource_class: explicit_resource_class))
           @resources << resource_class.new(resource_model)
         end
       end
