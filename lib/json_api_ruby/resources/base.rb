@@ -37,7 +37,7 @@ module JsonApi
       end
 
       def attributes_hash
-        Array(self.class.fields).inject({}) do |attrs, attr|
+        fields_array.inject({}) do |attrs, attr|
           meth = method(attr)
           attrs[attr.to_s] = meth.call
           attrs
@@ -47,11 +47,46 @@ module JsonApi
       # Builds relationship resource classes
       def build_object_graph
         @relationships ||= []
-        Array(self.class.relationships).each do |relationship|
+        relationships_array.each do |relationship|
           included = includes.include?(relationship.name)
           rel = relationship.build_resources({parent_resource: self, included: included})
           @relationships << rel
         end
+      end
+
+      # Traverses fields set on super-class(es) and concatinates them into a
+      # single set. Stores the set in `self.class.fields`, leaving super-class
+      # `fields` sets untouched.
+      def fields_array(klass = self.class)
+        fields_list = concat_list(self.class.fields, klass.fields)
+        unless klass.superclass == Resource
+          return fields_array(klass.superclass)
+        end
+        fields_list
+      end
+
+      # Traverses relationships set on super-class(es) and concatinates them
+      # into a single set. Stores the set in `self.class.relationships`,
+      # leaving super-class `relationships` sets untouched.
+      def relationships_array(klass = self.class)
+        rel_list = concat_list(self.class.relationships, klass.relationships)
+        unless klass.superclass == Resource
+          return relationships_array(klass.superclass)
+        end
+        rel_list
+      end
+
+      private
+
+      # Adds elements of the `concat_list` to the `target_list` if they are
+      # not already present.
+      def concat_list(target_list, concat_list)
+        list = Array(target_list)
+        not_in_list = Array(concat_list).reject do |item|
+          list.include?(item)
+        end
+        not_in_list.each { |item| list << item }
+        list
       end
     end
 

@@ -87,4 +87,65 @@ RSpec.describe JsonApi::Resource do
       expect(serialized_person['links']['self']).to eq("http://localhost:3000/people/#{person.id}")
     end
   end
+
+  describe 'deep subclassing of Resources' do
+    let(:person) { Person.new('Philip J. Fry', 'fry@thefuture.com', 'www.thefuture.com', '@philipjfry') }
+    subject(:super_class_serialization) do
+      PersonResource.new(person).to_hash
+    end
+
+    context 'subclasses of class whose superclass is Resource' do
+      subject(:subclass_serialization) do
+        SubclassedPersonResource.new(person).to_hash
+      end
+
+      it "does not affect its super-class's list of attributes" do
+        expect(PersonResource.fields).to_not eq(SubclassedPersonResource.fields)
+      end
+
+      it 'concatinates its attributes with the list of attributes from its super-class' do
+        expected_attributes = super_class_serialization['attributes'].merge('website' => 'www.thefuture.com')
+        expect(subclass_serialization['attributes']).to eq(expected_attributes)
+      end
+
+      it 'returns the same relationships as its super-class' do
+        expect(subclass_serialization['relationships']).to eq(super_class_serialization['relationships'])
+      end
+
+      context 'with overridden attributes' do
+        subject(:overridden_serialization) do
+          OverriddenSubclassedPersonResource.new(person).to_hash
+        end
+
+        it 'returns overridden attributes from the subclass' do
+          expect(overridden_serialization['attributes']['name']).to eq('Philip J. Fry!!')
+        end
+      end
+    end
+
+    context 'subclasses of subclasses of class whose superclass is Resource' do
+      subject(:deep_subclass_serialization) do
+        DeeplySubclassedPersonResource.new(person).to_hash
+      end
+
+      it 'concatinates its attributes with the list of attributes from its super-classes' do
+        expected_attributes = super_class_serialization['attributes'].merge('website' => 'www.thefuture.com', 'twitter' => '@philipjfry')
+        expect(deep_subclass_serialization['attributes']).to eq(expected_attributes)
+      end
+
+      it 'returns the same relationships as its super-classes' do
+        expect(deep_subclass_serialization['relationships']).to eq(super_class_serialization['relationships'])
+      end
+
+      context 'with overridden attributes' do
+        subject(:deep_overridden_serialization) do
+          OverriddenDeeplySubclassedPersonResource.new(person).to_hash
+        end
+
+        it 'returns overridden attributes from the subclass' do
+          expect(deep_overridden_serialization['attributes']['name']).to eq('Philip J. Fry?')
+        end
+      end
+    end
+  end
 end

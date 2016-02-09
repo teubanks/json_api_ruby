@@ -1,3 +1,6 @@
+0.2.0
+Added the ability to subclass from a class whose superclass is Resource
+
 0.1.1
 Fix issues related to empty or nil objects
 
