@@ -53,11 +53,13 @@ end
 
 class Person
   include Identifiers
-  attr_accessor :name, :email_address, :created_at, :updated_at
+  attr_accessor :name, :email_address, :website, :twitter, :created_at, :updated_at
 
-  def initialize(name, email)
+  def initialize(name, email, website = nil, twitter = nil)
     @name = name
     @email_address = email
+    @website = website
+    @twitter = twitter
     @created_at = 1.month.ago
     @updated_at = 1.month.ago
   end
@@ -74,6 +76,26 @@ class PersonResource < JsonApi::Resource
   attribute :updated_at
 
   has_many :articles
+end
+
+class SubclassedPersonResource < PersonResource
+  attribute :website
+end
+
+class DeeplySubclassedPersonResource < SubclassedPersonResource
+  attribute :twitter
+end
+
+class OverriddenSubclassedPersonResource < PersonResource
+  def name
+    object.name + '!!'
+  end
+end
+
+class OverriddenDeeplySubclassedPersonResource < OverriddenSubclassedPersonResource
+  def name
+    object.name + '?'
+  end
 end
 
 class ArticleResource < JsonApi::Resource
@@ -127,4 +149,3 @@ module DifferentNamespace
   class ThreeResource < JsonApi::Resource
   end
 end
-
