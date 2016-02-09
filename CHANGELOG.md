@@ -1,3 +1,6 @@
+0.2.1
+Fix issues with `_id_field` on subclasses of class whose superclass is Resource
+
 0.2.0
 Added the ability to subclass from a class whose superclass is Resource
 

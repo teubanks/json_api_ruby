@@ -99,6 +99,10 @@ RSpec.describe JsonApi::Resource do
         SubclassedPersonResource.new(person).to_hash
       end
 
+      it 'can override the id field of its super-class' do
+        expect(subclass_serialization['id']).to eq('Philip J. Fry')
+      end
+
       it "does not affect its super-class's list of attributes" do
         expect(PersonResource.fields).to_not eq(SubclassedPersonResource.fields)
       end
@@ -109,7 +113,9 @@ RSpec.describe JsonApi::Resource do
       end
 
       it 'returns the same relationships as its super-class' do
-        expect(subclass_serialization['relationships']).to eq(super_class_serialization['relationships'])
+        actual_relationship_names = subclass_serialization['relationships'].keys
+        expected_relationship_names = super_class_serialization['relationships'].keys
+        expect(actual_relationship_names).to eq(expected_relationship_names)
       end
 
       context 'with overridden attributes' do
@@ -126,6 +132,10 @@ RSpec.describe JsonApi::Resource do
     context 'subclasses of subclasses of class whose superclass is Resource' do
       subject(:deep_subclass_serialization) do
         DeeplySubclassedPersonResource.new(person).to_hash
+      end
+
+      it 'can fall back to the id of its super-class' do
+        expect(deep_subclass_serialization['id']).to eq('Philip J. Fry')
       end
 
       it 'concatinates its attributes with the list of attributes from its super-classes' do
