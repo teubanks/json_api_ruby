@@ -79,6 +79,7 @@ class PersonResource < JsonApi::Resource
 end
 
 class SubclassedPersonResource < PersonResource
+  id_field :name
   attribute :website
 end
 
