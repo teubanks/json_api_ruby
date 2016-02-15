@@ -25,7 +25,7 @@ module JsonApi
       end
 
       def identifier_hash
-        { 'id' => _model.send(id_field), 'type' =>  self.type }
+        { 'id' => self.id, 'type' =>  self.type }
       end
 
       def links_hash
@@ -77,17 +77,6 @@ module JsonApi
       end
 
       private
-
-      # Traverses superclasses for the first `_id_field` not set to `:id` and
-      # return its value. Stops when the superclass is Resource.
-      def id_field(klass = self.class)
-        return klass._id_field unless klass._id_field == :id
-        if klass.superclass == Resource
-          klass._id_field
-        else
-          id_field(klass.superclass)
-        end
-      end
 
       # Adds elements of the `concat_list` to the `target_list` if they are
       # not already present.

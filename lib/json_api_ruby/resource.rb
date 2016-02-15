@@ -8,7 +8,7 @@ module JsonApi
     extend Resources::DSL
 
     def self.inherited(subclass)
-      subclass.send(:id_field, :id)
+      subclass.id_field(@_id_field || :id)
     end
 
     # Can be set using `id_field` in the created resource class like so:
