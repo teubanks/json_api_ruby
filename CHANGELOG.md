@@ -1,3 +1,6 @@
+0.2.2
+Fix issues with `id_field` returning a string and not supporting method overriding
+
 0.2.1
 Fix issues with `_id_field` on subclasses of class whose superclass is Resource
 

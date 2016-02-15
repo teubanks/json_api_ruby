@@ -144,7 +144,7 @@ RSpec.describe JsonApi::Resource do
       end
 
       it 'returns the same relationships as its super-classes' do
-        expect(deep_subclass_serialization['relationships']).to eq(super_class_serialization['relationships'])
+        expect(deep_subclass_serialization['relationships'].keys).to eq(super_class_serialization['relationships'].keys)
       end
 
       context 'with overridden attributes' do

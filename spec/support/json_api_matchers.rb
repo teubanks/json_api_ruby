@@ -41,7 +41,7 @@ RSpec::Matchers.define :be_valid_json_api do
     actual = Hash(actual).stringify_keys
     has_id_and_type = actual['id'].present? && actual['type'].present?
 
-    is_a_hash && has_id_and_type
+    is_a_hash && has_id_and_type && actual['id'].is_a?(String)
   end
 end
 
