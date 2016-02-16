@@ -1,3 +1,6 @@
+0.3.0
+Added `cardinality` instance method to `ToManyRelationship` and `ToOneRelationship`
+
 0.2.2
 Fix issues with `id_field` returning a string and not supporting method overriding
 

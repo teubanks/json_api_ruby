@@ -103,6 +103,10 @@ module JsonApi
       def resource_object
         @resources.first
       end
+
+      def cardinality
+        :one
+      end
     end
 
     class ToManyRelationship < Relationship
@@ -125,6 +129,10 @@ module JsonApi
 
       def resource_objects
         @resources
+      end
+
+      def cardinality
+        :many
       end
     end
   end

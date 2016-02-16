@@ -21,6 +21,11 @@ RSpec.describe JsonApi::Resources::RelationshipMeta do
     end
   end
 
+  it 'exposes its cardinality' do
+    expect(author_relation.cardinality).to eq :one
+    expect(comments_relation.cardinality).to eq :many
+  end
+
   describe 'link serialization' do
     subject(:links_object) do
       rel = author_relation.build_resources(parent_resource: article_resource)
