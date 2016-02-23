@@ -1,9 +1,17 @@
 module JsonApi
   class Configuration
-    attr_reader :base_url
+    attr_accessor :base_url
+    attr_accessor :use_links
+
+    DEFAULTS = {
+      base_url: 'http://localhost:3000',
+      use_links: true
+    }
 
     def initialize
-      @base_url = 'http://localhost:3000'
+      DEFAULTS.each do |key, value|
+        self.instance_variable_set("@#{key}", value)
+      end
     end
   end
 
