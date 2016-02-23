@@ -13,7 +13,7 @@ module JsonApi
           resource_hash['relationships'][relationship.name] = relationship.to_hash
         end
 
-        resource_hash['links'] = links_hash if JsonApi.configuration.use_links
+        resource_hash['links'] = links_hash if self.use_links
         resource_hash
       end
 

@@ -2,6 +2,7 @@ module JsonApi
   module Resources
     module DSL
       attr :_id_field
+      attr :_use_links
       attr :fields
       attr :relationships
 
@@ -27,6 +28,10 @@ module JsonApi
 
       def id_field(key)
         @_id_field = key
+      end
+
+      def use_links(yesno)
+        @_use_links = yesno
       end
 
       private
