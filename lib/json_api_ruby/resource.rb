@@ -9,6 +9,7 @@ module JsonApi
 
     def self.inherited(subclass)
       subclass.id_field(@_id_field || :id)
+      subclass.use_links(@_use_links || JsonApi.configuration.use_links)
     end
 
     # Can be set using `id_field` in the created resource class like so:
@@ -25,6 +26,10 @@ module JsonApi
     # Can be overridden in a subclass
     def type
       _model.class.to_s.underscore.pluralize
+    end
+
+    def use_links
+      self.class._use_links
     end
 
     # Makes the underlying object available to subclasses so we can do things
@@ -53,7 +58,7 @@ module JsonApi
     def initialize(model, options={})
       options.stringify_keys!
       @_model = model
-      @includes = Array.wrap(options.fetch('include', [])).map(&:to_s)
+      @includes = options.fetch('include', [])
       build_object_graph # base module method
     end
   end

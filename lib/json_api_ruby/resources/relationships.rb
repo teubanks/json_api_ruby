@@ -60,21 +60,22 @@ module JsonApi
         @resources = []
         @parent = options.fetch(:parent_resource)
         @parent_model = parent._model
-        @included = options.fetch(:included, false)
+        @included = options.fetch(:included, {})
         @explicit_resource_class = options.fetch(:explicit_resource_class)
       end
 
       def included?
-        included == true
+        included.present? && included.includes.include?(@name)
       end
 
       def to_hash
-        return_hash = links
+        return_hash = {}
+        return_hash.merge!(relationship_links) if JsonApi.configuration.use_links
         return_hash.merge!(data) if included?
         return_hash
       end
 
-      def links
+      def relationship_links
         {
           'links' => {
             'self' => JsonApi.configuration.base_url + parent.self_link_path + "/relationships/#{name}",
@@ -97,7 +98,7 @@ module JsonApi
         return if resource_model.blank?
 
         resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent, resource_class: explicit_resource_class))
-        @resources << resource_class.new(resource_model)
+        @resources << resource_class.new(resource_model, options.merge({include: included.next}))
       end
 
       def resource_object
@@ -123,7 +124,7 @@ module JsonApi
 
         parent_model.send(name).each do |resource_model|
           resource_class = Discovery.resource_for_name(resource_model, options.merge(parent_resource: parent, resource_class: explicit_resource_class))
-          @resources << resource_class.new(resource_model)
+          @resources << resource_class.new(resource_model, options.merge({include: included.next}))
         end
       end
 

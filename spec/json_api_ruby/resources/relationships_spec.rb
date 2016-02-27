@@ -55,11 +55,20 @@ RSpec.describe JsonApi::Resources::RelationshipMeta do
         expect(links_object['links']['related']).to eq "http://localhost:3000/articles/#{article.uuid}/author"
       end
     end
+
+    context 'with links turned off' do
+      before { JsonApi.configuration.use_links = false }
+      after { JsonApi.configuration.use_links = true }
+      it 'returns an empty hash' do
+        expect(links_object['links']).to be_blank
+      end
+    end
   end
 
   describe 'data serialization' do
+    let(:included_data) { JsonApi::Includes.parse_includes('author') }
     subject(:serialized_object) do
-      rel = author_relation.build_resources(parent_resource: article_resource, included: true)
+      rel = author_relation.build_resources(parent_resource: article_resource, included: included_data)
       rel.to_hash
     end
 
@@ -69,8 +78,9 @@ RSpec.describe JsonApi::Resources::RelationshipMeta do
 
     describe 'data object' do
       context 'when an array' do
+        let(:included_data) { JsonApi::Includes.parse_includes('comments') }
         subject(:serialized_object) do
-          rel = comments_relation.build_resources(parent_resource: article_resource, included: true)
+          rel = comments_relation.build_resources(parent_resource: article_resource, included: included_data)
           rel.to_hash
         end
 
@@ -88,8 +98,9 @@ RSpec.describe JsonApi::Resources::RelationshipMeta do
   end
 
   describe 'identity hash' do
+    let(:included_data) { JsonApi::Includes.parse_includes('author') }
     it 'returns an identity hash given a model and parent resource' do
-      rel = author_relation.build_resources(parent_resource: article_resource, included: true)
+      rel = author_relation.build_resources(parent_resource: article_resource, included: included_data)
       serialized_object = rel.to_hash
       expect(serialized_object['data'].keys).to eq ['id', 'type']
     end
@@ -97,8 +108,9 @@ RSpec.describe JsonApi::Resources::RelationshipMeta do
 
   describe 'relationship serialization' do
     context 'when the option "include" is true' do
+    let(:included_data) { JsonApi::Includes.parse_includes('author') }
       it 'includes the data object' do
-        rel = author_relation.build_resources(parent_resource: article_resource, included: true)
+        rel = author_relation.build_resources(parent_resource: article_resource, included: included_data)
         serialized_data = rel.to_hash
         expect(serialized_data).to include('data')
       end
@@ -115,7 +127,7 @@ RSpec.describe JsonApi::Resources::RelationshipMeta do
 
   describe 'passing in a resource class' do
     let(:simple_article_resource) do
-      SimpleArticleResource.new(article, include: ['author', 'comments'])
+      SimpleArticleResource.new(article, include: JsonApi::Includes.parse_includes(['author', 'comments']))
     end
 
     let(:author_relation) do

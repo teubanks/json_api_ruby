@@ -125,10 +125,11 @@ end
 
 class CommentResource < JsonApi::Resource
   id_field :uuid
-  attribute :author
   attribute :comment_text
   attribute :created_at
   attribute :updated_at
+
+  has_one :author
 end
 
 # namespaced resources
