@@ -1,3 +1,6 @@
+0.4.0
+Add support for nested includes and link enabling/disabling
+
 0.3.0
 Added `cardinality` instance method to `ToManyRelationship` and `ToOneRelationship`
 
