@@ -15,5 +15,8 @@ describe JsonApi::Configuration do
     expect(subject.use_links).to be_falsy
   end
 
-  after(:all) { JsonApi.configuration.base_url = 'http://localhost:3000' }
+  after(:all) do
+    JsonApi.configuration.base_url = 'http://localhost:3000'
+    JsonApi.configuration.use_links = true
+  end
 end

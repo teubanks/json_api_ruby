@@ -70,7 +70,7 @@ module JsonApi
 
       def to_hash
         return_hash = {}
-        return_hash.merge!(relationship_links)
+        return_hash.merge!(relationship_links) if JsonApi.configuration.use_links
         return_hash.merge!(data) if included?
         return_hash
       end

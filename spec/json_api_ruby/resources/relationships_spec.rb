@@ -55,6 +55,14 @@ RSpec.describe JsonApi::Resources::RelationshipMeta do
         expect(links_object['links']['related']).to eq "http://localhost:3000/articles/#{article.uuid}/author"
       end
     end
+
+    context 'with links turned off' do
+      before { JsonApi.configuration.use_links = false }
+      after { JsonApi.configuration.use_links = true }
+      it 'returns an empty hash' do
+        expect(links_object['links']).to be_blank
+      end
+    end
   end
 
   describe 'data serialization' do
