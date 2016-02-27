@@ -29,7 +29,7 @@ RSpec.describe JsonApi::Resource do
   describe 'relationships' do
     subject(:serialized_article) do
       article = Person.new('Anatoly Fyodorovich Krimov', 'red_star@kremlin.mil').articles.first
-      ArticleResource.new(article, include: [:author, :comments]).to_hash
+      ArticleResource.new(article, include: JsonApi::Includes.parse_includes([:author, :comments])).to_hash
     end
 
     context 'with a cardinality of one' do

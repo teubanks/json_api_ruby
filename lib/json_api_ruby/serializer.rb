@@ -33,11 +33,18 @@ module JsonApi
       resource_name  = "#{object.class.to_s.underscore}_resource".classify
       klass_name     = @resource_class || resource_name
       resource_klass = Resources::Discovery.resource_for_name(object, resource_class: klass_name)
-      resource_klass.new(object, include: @includes)
+      resource_klass.new(object, include: Includes.parse_includes(@includes))
     end
 
     def assemble_included_data(included_resources)
-      included_resources.uniq { |rel| rel.id + rel.type }.map(&:to_hash)
+      included_resources.map(&:to_hash)
+    end
+
+    def find_included_resources(object_resource)
+      included_resources = object_resource.relationships.select {|rel| rel.included?}.flat_map {|rel| rel.resources }
+      included_resources += included_resources.flat_map {|res| find_included_resources(res) }
+      included_resources.flatten
+      included_resources.uniq { |rel| rel.id + rel.type }
     end
   end
 
@@ -49,7 +56,7 @@ module JsonApi
       else
         object_resource = resource(@object)
         serialized = { 'data' => object_resource.to_hash }
-        included_resources += object_resource.relationships.select {|rel| rel.included?}.flat_map {|rel| rel.resources }
+        included_resources += find_included_resources(object_resource)
       end
 
       serialized['included'] = assemble_included_data(included_resources) if included_resources.present?
@@ -66,7 +73,7 @@ module JsonApi
 
       data_array = Array(@object).map do |object|
         object_resource = resource(object)
-        included_resources += object_resource.relationships.select {|rel| rel.included?}.flat_map {|rel| rel.resources }
+        included_resources += find_included_resources(object_resource)
         object_resource.to_hash
       end
 

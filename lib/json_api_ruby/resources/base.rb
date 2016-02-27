@@ -17,13 +17,6 @@ module JsonApi
         resource_hash
       end
 
-      # Very basic. Eventually this will need to parse things like
-      # "article.comments" and "article-comments", so, leaving the method here
-      # but only supporting the most basic of things
-      def parse_for_includes(includes)
-        Array(includes).map(&:to_s)
-      end
-
       def identifier_hash
         { 'id' => self.id, 'type' =>  self.type }
       end
@@ -48,8 +41,7 @@ module JsonApi
       def build_object_graph
         @relationships ||= []
         relationships_array.each do |relationship|
-          included = includes.include?(relationship.name)
-          rel = relationship.build_resources({parent_resource: self, included: included})
+          rel = relationship.build_resources({parent_resource: self, included: includes})
           @relationships << rel
         end
       end

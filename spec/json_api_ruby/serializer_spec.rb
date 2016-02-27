@@ -36,6 +36,7 @@ RSpec.describe JsonApi::Serializer do
       subject(:serialized) do
         JsonApi.serialize(person, meta: { meta_key: 'meta value' }, include: [:articles])
       end
+
       it 'has a top level included object' do
         expect(serialized['included']).to be_present
       end
@@ -45,6 +46,14 @@ RSpec.describe JsonApi::Serializer do
           document['id'] == person.articles.first.uuid
         end
         expect(found_document).to be_present
+      end
+
+      it 'supports nested includes' do
+        serialized = JsonApi.serialize(person, include: ['articles.comments'])
+        comments = serialized['included'].select do |document|
+          document['type'] == 'comments'
+        end
+        expect(comments).to be_present
       end
     end
   end

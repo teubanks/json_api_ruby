@@ -58,7 +58,7 @@ module JsonApi
     def initialize(model, options={})
       options.stringify_keys!
       @_model = model
-      @includes = Array.wrap(options.fetch('include', [])).map(&:to_s)
+      @includes = options.fetch('include', [])
       build_object_graph # base module method
     end
   end
