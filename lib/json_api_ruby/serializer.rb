@@ -25,7 +25,7 @@ module JsonApi
     def initialize(object, options)
       @meta           = options.fetch('meta', Hash.new).stringify_keys
       @object         = object
-      @includes       = options.fetch('include', [])
+      @includes       = options.fetch('include', Includes.new)
       @resource_class = options.fetch('resource_class', nil)
     end
 

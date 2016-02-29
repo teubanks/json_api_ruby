@@ -37,7 +37,7 @@ module JsonApi
       private
       def add_relationship(object_name, cardinality, options)
         @relationships ||= []
-        @relationships << RelationshipMeta.new(object_name, options.merge(cardinality: cardinality))
+        @relationships << JsonApi::Associations::Meta.new(object_name, options.merge(cardinality: cardinality))
         create_accessor_methods(object_name)
       end
 
