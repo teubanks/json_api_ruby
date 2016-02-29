@@ -1,3 +1,6 @@
+0.4.1
+Some major refactoring but no backwards compatibility breaking functionality
+
 0.4.0
 Add support for nested includes and link enabling/disabling
 
