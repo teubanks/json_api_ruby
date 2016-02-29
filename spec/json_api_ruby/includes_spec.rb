@@ -4,7 +4,7 @@ describe JsonApi::Includes do
   context 'with nil' do
     subject(:parsed_with_nil) { described_class.parse_includes(nil) }
     specify { expect(parsed_with_nil.includes).to eq [] }
-    specify { expect(parsed_with_nil.next).to be_nil }
+    specify { expect(parsed_with_nil.next).to be_an_instance_of(JsonApi::Includes) }
   end
 
   context 'with nested resources using the "." syntax' do

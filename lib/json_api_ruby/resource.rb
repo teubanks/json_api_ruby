@@ -1,5 +1,4 @@
 require_relative 'resources/base'
-require_relative 'resources/relationships'
 require_relative 'resources/dsl'
 
 module JsonApi
@@ -58,7 +57,7 @@ module JsonApi
     def initialize(model, options={})
       options.stringify_keys!
       @_model = model
-      @includes = options.fetch('include', [])
+      @includes = options.fetch('include', Includes.new)
       build_object_graph # base module method
     end
   end
