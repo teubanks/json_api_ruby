@@ -99,6 +99,8 @@ RSpec.describe JsonApi::Serializer do
 
     context 'with included resources' do
       subject(:serialized_resources) do
+        people.first.articles << people.second.articles.first
+        people.second.articles << people.first.articles.first
         JsonApi.serialize(people, meta: {'I' => 'have meta'}, include: [:articles])
       end
 
