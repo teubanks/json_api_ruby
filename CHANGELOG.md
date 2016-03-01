@@ -1,3 +1,7 @@
+0.4.2
+Fixed an issue where serializing a collection with `include` options could result in duplicate
+data returned in the `included` key
+
 0.4.1
 Some major refactoring but no backwards compatibility breaking functionality
 
