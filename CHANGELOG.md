@@ -1,3 +1,6 @@
+0.4.3
+Removed the constraint on activesupport 3. Should be >= 3 not ~> 3
+
 0.4.2
 Fixed an issue where serializing a collection with `include` options could result in duplicate
 data returned in the `included` key

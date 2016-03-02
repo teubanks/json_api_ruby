@@ -1,8 +1,8 @@
 PATH
   remote: .
   specs:
-    json_api_ruby (0.4.2)
-      activesupport (~> 3)
+    json_api_ruby (0.4.3)
+      activesupport (>= 3)
 
 GEM
   remote: https://rubygems.org/
