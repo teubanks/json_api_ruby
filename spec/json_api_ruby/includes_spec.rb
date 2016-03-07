@@ -33,4 +33,19 @@ describe JsonApi::Includes do
       specify { expect(parsed_includes.next.next.includes).to eq ['thingthree', 'thingfive'] }
     end
   end
+
+  describe 'flattened hash' do
+    subject(:flattened) do
+      described_class.flatten_hash(hash)
+    end
+
+    context 'given the deeply nested hash { foo: { bar: :baz } }' do
+      let(:hash) do
+        { foo: { bar: :baz } }
+      end
+      let(:expected_ary) { ['foo', 'bar', 'baz'] }
+
+      it { expect(flattened).to eq expected_ary }
+    end
+  end
 end

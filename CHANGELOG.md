@@ -1,3 +1,7 @@
+0.4.4
+Adds support for passing a hash-based argument list to `include`, matching the
+interface of ActiveRecord::QueryMethods#includes.
+
 0.4.3
 Removed the constraint on activesupport 3. Should be >= 3 not ~> 3
 

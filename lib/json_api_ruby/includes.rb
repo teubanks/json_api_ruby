@@ -10,7 +10,14 @@ module JsonApi
     def self.parse_includes(includes)
       first_include = self.new
 
-      split_includes = Array(includes).map{|inc| inc.to_s.split('.')}
+      split_includes = Array(includes).map do |inc|
+        if inc.is_a? Hash
+          flatten_hash(inc)
+        else
+          inc.to_s.split('.')
+        end
+      end
+
       if split_includes.blank?
         return first_include
       end
@@ -29,6 +36,19 @@ module JsonApi
       end
 
       first_include
+    end
+
+    # Recursive function to convert a hash into an array of arrays of strings
+    # Ex: { foo: { bar: :baz } } flattens to [['foo', 'bar', 'baz']]
+    def self.flatten_hash(inc, ary = [])
+      inc.to_a.flat_map do |a|
+        if a.last.is_a? Hash
+          ary << a.first.to_s
+          flatten_hash(a.last, ary)
+        else
+          ary + a.map(&:to_s)
+        end
+      end
     end
 
     def has_name?(name)
