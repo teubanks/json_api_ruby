@@ -48,12 +48,31 @@ RSpec.describe JsonApi::Serializer do
         expect(found_document).to be_present
       end
 
-      it 'supports nested includes' do
-        serialized = JsonApi.serialize(person, include: ['articles.comments'])
-        comments = serialized['included'].select do |document|
-          document['type'] == 'comments'
+      context 'deeply nested' do
+        describe 'requested included data' do
+          subject(:comments) do
+            serialized['included'].select do |document|
+              document['type'] == 'comments'
+            end
+          end
+          subject(:author) do
+            serialized['included'].detect do |document|
+              document['type'] == 'people'
+            end
+          end
+
+          context 'with string arguments' do
+            let(:serialized) { JsonApi.serialize(person, include: ['articles.comments.author']) }
+            it { expect(comments).to be_present }
+            it { expect(author).to be_present }
+          end
+
+          context 'with hash arguments' do
+            let(:serialized) { JsonApi.serialize(person, include: [{ articles: { comments: :author } }]) }
+            it { expect(comments).to be_present }
+            it { expect(author).to be_present }
+          end
         end
-        expect(comments).to be_present
       end
     end
   end
