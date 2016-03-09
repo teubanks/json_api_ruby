@@ -11,19 +11,13 @@ module JsonApi
       first_include = self.new
 
       split_includes = Array(includes).map{|inc| inc.to_s.split('.')}
-      if split_includes.blank?
-        return first_include
-      end
+      split_includes = ArrayTransposer.new(split_includes).transpose_array
+      first_array = split_includes.shift
+      first_include.includes = Array(first_array).uniq.compact
 
-      first_array = Array(split_includes.first)
-      other_arrays = split_includes[1..-1]
-      zipped = first_array.zip(*other_arrays)
-      first_array = zipped.shift
-      first_include.includes = first_array.uniq.compact
-
-      zipped.inject(first_include) do |base_include, object_name|
+      split_includes.inject(first_include) do |base_include, sub_array|
         new_include = self.new
-        new_include.includes = object_name.uniq.compact
+        new_include.includes = sub_array.uniq.compact
         base_include.next = new_include
         new_include
       end
@@ -41,6 +35,42 @@ module JsonApi
 
     def next
       @next || self.class.new
+    end
+
+  end
+
+  class ArrayTransposer
+    attr_reader :array
+
+    def initialize(array)
+      @array = Array(array)
+    end
+
+    def transpose_array
+      padded_sub_arrays.transpose
+    end
+
+    def padded_sub_arrays
+      max_length = largest_sub_array_length
+      array.map do |sub_array|
+        sub_array.extend(ArrayPadder)
+        sub_array.pad(max_length)
+      end
+    end
+
+    def largest_sub_array_length
+      largest_count = 0
+      array.each do |sub_array|
+        largest_count = sub_array.count if sub_array.length > largest_count
+      end
+      largest_count
+    end
+  end
+
+  # Meant to be extended within an Array instance
+  module ArrayPadder
+    def pad(length)
+      self + self.class.new(length - self.length) { nil }
     end
   end
 end
