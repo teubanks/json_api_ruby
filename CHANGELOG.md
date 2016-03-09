@@ -1,3 +1,6 @@
+0.4.4
+Fixed an issue with complex includes
+
 0.4.3
 Removed the constraint on activesupport 3. Should be >= 3 not ~> 3
 

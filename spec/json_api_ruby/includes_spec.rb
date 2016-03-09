@@ -25,10 +25,10 @@ describe JsonApi::Includes do
 
     context 'complex includes' do
       subject(:parsed_includes) do
-        described_class.parse_includes(['thingone.thingtwo.thingthree', 'thingone.thingfour', 'thingone.thingtwo.thingfive', 'thingsix.thingseven'])
+        described_class.parse_includes(['thingeight', 'thingnine', 'thingone.thingtwo.thingthree', 'thingone.thingfour', 'thingone.thingtwo.thingfive', 'thingsix.thingseven'])
       end
 
-      specify { expect(parsed_includes.includes).to eq ['thingone', 'thingsix'] }
+      specify { expect(parsed_includes.includes).to eq ['thingeight', 'thingnine', 'thingone', 'thingsix'] }
       specify { expect(parsed_includes.next.includes).to eq ['thingtwo', 'thingfour', 'thingseven'] }
       specify { expect(parsed_includes.next.next.includes).to eq ['thingthree', 'thingfive'] }
     end
