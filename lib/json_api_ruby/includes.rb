@@ -36,7 +36,6 @@ module JsonApi
     def next
       @next || self.class.new
     end
-
   end
 
   class ArrayTransposer
