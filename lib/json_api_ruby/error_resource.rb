@@ -6,6 +6,9 @@ class ErrorResource
   end
 
   def to_hash
+    tf = CoverageTestFile.new
+    tf.is_test?
+    tf.print_description
     { 'detail' => object }
   end
 end
