@@ -7,7 +7,7 @@ class CoverageTestFile
     @is_test == true
   end
 
-  def description
+  def print_description
     which = "this file"
     what = "tests code coverage"
     puts "#{which} #{what}"
