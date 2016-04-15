@@ -1,6 +1,12 @@
+if ENV['CI'] == 'true'
+  require 'simplecov'
+  SimpleCov.start
+  require 'codecov'
+  SimpleCov.formatter = SimpleCov::Formatter::Codecov
+end
+
 require 'active_support'
 require 'active_support/core_ext'
-require 'pry-byebug'
 require_relative '../lib/json_api_ruby'
 require_relative 'support/resource_objects'
 require_relative 'support/json_api_matchers'
