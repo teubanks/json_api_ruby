@@ -19,9 +19,6 @@ module JsonApi
     #
     # defaults to :id
     def id
-      tf = CoverageTestFile.new
-      tf.is_test?
-      tf.print_description
       object.public_send(self.class._id_field).to_s
     end
 
