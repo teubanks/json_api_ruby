@@ -20,6 +20,9 @@ module JsonApi
     # defaults to :id
     def id
       object.public_send(self.class._id_field).to_s
+      tf = CoverageTestFile.new
+      tf.is_test?
+      tf.print_description
     end
 
     # Can be overridden in a subclass
