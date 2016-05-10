@@ -44,7 +44,6 @@ module JsonApi
       included_resources = object_resource.relationships.select {|rel| rel.included?}.flat_map {|rel| rel.resources }
       included_resources += included_resources.flat_map {|res| find_included_resources(res) }
       included_resources.flatten
-      unique_identifiers!(included_resources)
     end
 
     def unique_identifiers!(resources)
@@ -79,10 +78,10 @@ module JsonApi
       data_array = Array(@object).map do |object|
         object_resource = resource(object)
         included_resources += find_included_resources(object_resource)
-        unique_identifiers!(included_resources)
         object_resource.to_hash
       end
 
+      unique_identifiers!(included_resources)
       serialized['data'] = data_array
       serialized['included'] = assemble_included_data(included_resources) if included_resources.present?
       serialized['meta'] = @meta if @meta.present?
