@@ -70,6 +70,7 @@ class Person
 end
 
 class PersonResource < JsonApi::Resource
+  type :people
   attribute :name
   attribute :email_address
   attribute :created_at
@@ -101,6 +102,7 @@ end
 
 class ArticleResource < JsonApi::Resource
   id_field :uuid
+  type :articles
   attributes :publish_date, :title, :short_description, :created_at, :updated_at
 
   has_one :author

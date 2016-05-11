@@ -24,7 +24,11 @@ module JsonApi
 
     # Can be overridden in a subclass
     def type
-      _model.class.to_s.underscore.pluralize
+      if self.class._type
+        self.class._type
+      else
+        @type ||= _model.class.to_s.underscore.pluralize
+      end
     end
 
     def use_links

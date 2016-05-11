@@ -1,10 +1,8 @@
 require 'spec_helper'
 
 RSpec.describe JsonApi::Resource do
-  subject(:serialized_person) do
-    person = Person.new('Brad J. Armbruster', 'ace@airforce.mil')
-    PersonResource.new(person).to_hash
-  end
+  let(:person) { Person.new('Brad J. Armbruster', 'ace@airforce.mil') }
+  subject(:serialized_person) { PersonResource.new(person).to_hash }
 
   it 'is follows the JSON API spec' do
     expect(serialized_person).to be_valid_json_api
@@ -24,6 +22,15 @@ RSpec.describe JsonApi::Resource do
 
   it 'has an updated_at timestamp' do
     expect(serialized_person).to have_attribute(:updated_at)
+  end
+
+  describe 'overridding type' do
+    before { PersonResource.type(:persons) }
+    after { PersonResource.type(nil) }
+
+    it 'has "persons" as its type' do
+      expect(serialized_person['type']).to eq 'persons'
+    end
   end
 
   describe 'relationships' do

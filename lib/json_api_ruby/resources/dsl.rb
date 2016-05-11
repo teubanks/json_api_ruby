@@ -3,6 +3,7 @@ module JsonApi
     module DSL
       attr :_id_field
       attr :_use_links
+      attr :_type
       attr :fields
       attr :relationships
 
@@ -28,6 +29,15 @@ module JsonApi
 
       def id_field(key)
         @_id_field = key
+      end
+
+      def type(type)
+        # allow falling back to default if we reallly want to
+        if type.blank?
+          @_type = nil
+        else
+          @_type = type.to_s
+        end
       end
 
       def use_links(yesno)
