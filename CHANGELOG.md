@@ -1,3 +1,10 @@
+0.5.0
+Introduce ability to specify type on the resource object
+Speed up serialization by caching type if it's not specified
+
+0.4.5
+Speed up serialization by removing superfluous call
+
 0.4.4
 Fixed an issue with complex includes
 
